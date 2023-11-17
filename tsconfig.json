@@ -1,42 +1,25 @@
 {
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file */
-    // Recommended Node options have been incorporated from https://github.com/tsconfig/bases/blob/master/bases/node14.json
+    "incremental": true,
+    "sourceMap": false,
 
-    // Node LTS Fermium (14.x) has mostly complete support for ES2019 (as reported by https://node.green/)
-    "target": "ES2019",
+    "target": "ESNext",
     "module": "commonjs",
-    // "esModuleInterop": true,
 
-    // Overrides default in order to remove "dom" because this package shouldn't assume the presence of browser APIs
-    "lib": ["ES2019"],
+    "moduleResolution": "Node",
 
-    // Emit location
-    "outDir": "build",
+    "allowSyntheticDefaultImports": true,
 
-    // Emit sourcemaps
-    "declarationMap": true,
-    "sourceMap": true,
-    "inlineSources": true,
+    "useDefineForClassFields": false,
 
-    // Emit type definitions
-    "declaration": true,
+    "strict": false,
+    "suppressImplicitAnyIndexErrors": true,
 
-    // Strict mode
-    "strict": true,
-
-    // Allow import package.json
-    "resolveJsonModule": true,
-
-    // Linter style rules
-    "noUnusedLocals": false, // Disabled because we use eslint for this.
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "forceConsistentCasingInFileNames": true
+    "allowJs": true,
+    "checkJs": false
   },
-
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*"]
 }

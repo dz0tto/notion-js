@@ -1,285 +1,57 @@
-<div align="center">
-	<h1>Notion SDK for JavaScript</h1>
-	<p>
-		<b>A simple and easy to use client for the <a href="https://developers.notion.com">Notion API</a></b>
-	</p>
-	<br>
-</div>
+# Sample Integration: Notion to Email
 
-![Build status](https://github.com/makenotion/notion-sdk-js/actions/workflows/ci.yml/badge.svg)
-[![npm version](https://badge.fury.io/js/%40notionhq%2Fclient.svg)](https://www.npmjs.com/package/@notionhq/client)
+<img src="https://dev.notion.so/front-static/external/readme/images/notion-email-example@2x.png" alt="drawing" width="500"/>
 
-## Installation
+## About the Integration
 
-```
-npm install @notionhq/client
-```
+This Notion integration sends an email whenever the Status of a page in a database is updated.
 
-## Usage
+This sample was built using [this database template](https://public-api-examples.notion.site/0def5dfb6d9b4cdaa907a0466834b9f4?v=aea75fc133e54b3382d12292291d9248) and emails are sent using [SendGrid's API](https://sendgrid.com).
 
-> Use Notion's [Getting Started Guide](https://developers.notion.com/docs/getting-started) to get set up to use Notion's API.
+### 1. Setup your local project
 
-Import and initialize a client using an **integration token** or an OAuth **access token**.
+```zsh
+# Clone this repository locally
+git clone https://github.com/makenotion/notion-sdk-js.git
 
-```js
-const { Client } = require("@notionhq/client")
+# Switch into this project
+cd notion-sdk-js/examples/database-update-send-email
 
-// Initializing a client
-const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
-})
+# Install the dependencies
+npm install
 ```
 
-Make a request to any Notion API endpoint.
+### 2. Setup a free account at [SendGrid](https://sendgrid.com)
 
-> See the complete list of endpoints in the [API reference](https://developers.notion.com/reference).
+Sign up for a free account and follow the instructions to use the Email API.
 
-```js
-;(async () => {
-  const listUsersResponse = await notion.users.list({})
-})()
+Choose the option for integrating with the Web API and follow instructions to
+get your API token.
+
+## Running Locally
+
+### 3. Setup your Notion workspace
+
+You can create your Notion API key [here](https://www.notion.com/my-integrations).
+
+To create a Notion database that will work with this example, duplicate [this database template](https://public-api-examples.notion.site/0def5dfb6d9b4cdaa907a0466834b9f4?v=aea75fc133e54b3382d12292291d9248).
+
+Your Notion integration will need access to the Notion database you have created. To provide access, follow the instructions found in Notion's [Integration guide](https://developers.notion.com/docs/create-a-notion-integration#step-2-share-a-database-with-your-integration).
+
+### 4. Set your environment variables to a `.env` file
+
+Rename `example.env` to `.env` in this directory and add the following fields:
+
+```zsh
+NOTION_KEY=<your-notion-api-key>
+SENDGRID_KEY=<your-sendgrid-api-key>
+NOTION_DATABASE_ID=<your-notion-database-id>
+EMAIL_TO_FIELD=<email-recipients>
+EMAIL_FROM_FIELD=<email-from-field>
 ```
 
-Each method returns a `Promise` which resolves the response.
+### 5. Run code
 
-```js
-console.log(listUsersResponse)
+```zsh
+npm run ts-run
 ```
-
-```
-{
-  results: [
-    {
-      object: 'user',
-      id: 'd40e767c-d7af-4b18-a86d-55c61f1e39a4',
-      type: 'person',
-      person: {
-        email: 'avo@example.org',
-      },
-      name: 'Avocado Lovelace',
-      avatar_url: 'https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg',
-    },
-    ...
-  ]
-}
-```
-
-Endpoint parameters are grouped into a single object. You don't need to remember which parameters go in the path, query, or body.
-
-```js
-const myPage = await notion.databases.query({
-  database_id: "897e5a76-ae52-4b48-9fdf-e71f5945d1af",
-  filter: {
-    property: "Landmark",
-    rich_text: {
-      contains: "Bridge",
-    },
-  },
-})
-```
-
-### Handling errors
-
-If the API returns an unsuccessful response, the returned `Promise` rejects with a `APIResponseError`.
-
-The error contains properties from the response, and the most helpful is `code`. You can compare `code` to the values in the `APIErrorCode` object to avoid misspelling error codes.
-
-```js
-const { Client, APIErrorCode } = require("@notionhq/client")
-
-try {
-  const notion = new Client({ auth: process.env.NOTION_TOKEN })
-  const myPage = await notion.databases.query({
-    database_id: databaseId,
-    filter: {
-      property: "Landmark",
-      rich_text: {
-        contains: "Bridge",
-      },
-    },
-  })
-} catch (error) {
-  if (error.code === APIErrorCode.ObjectNotFound) {
-    //
-    // For example: handle by asking the user to select a different database
-    //
-  } else {
-    // Other error handling code
-    console.error(error)
-  }
-}
-```
-
-### Logging
-
-The client emits useful information to a logger. By default, it only emits warnings and errors.
-
-If you're debugging an application, and would like the client to log response bodies, set the `logLevel` option to `LogLevel.DEBUG`.
-
-```js
-const { Client, LogLevel } = require("@notionhq/client")
-
-const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
-  logLevel: LogLevel.DEBUG,
-})
-```
-
-You may also set a custom `logger` to emit logs to a destination other than `stdout`. A custom logger is a function which is called with 3 parameters: `logLevel`, `message`, and `extraInfo`. The custom logger should not return a value.
-
-### Client options
-
-The `Client` supports the following options on initialization. These options are all keys in the single constructor parameter.
-
-| Option      | Default value              | Type         | Description                                                                                                                                                  |
-| ----------- | -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auth`      | `undefined`                | `string`     | Bearer token for authentication. If left undefined, the `auth` parameter should be set on each request.                                                      |
-| `logLevel`  | `LogLevel.WARN`            | `LogLevel`   | Verbosity of logs the instance will produce. By default, logs are written to `stdout`.                                                                       |
-| `timeoutMs` | `60_000`                   | `number`     | Number of milliseconds to wait before emitting a `RequestTimeoutError`                                                                                       |
-| `baseUrl`   | `"https://api.notion.com"` | `string`     | The root URL for sending API requests. This can be changed to test with a mock server.                                                                       |
-| `logger`    | Log to console             | `Logger`     | A custom logging function. This function is only called when the client emits a log that is equal or greater severity than `logLevel`.                       |
-| `agent`     | Default node agent         | `http.Agent` | Used to control creation of TCP sockets. A common use is to proxy requests with [`https-proxy-agent`](https://github.com/TooTallNate/node-https-proxy-agent) |
-
-### TypeScript
-
-This package contains type definitions for all request parameters and responses,
-as well as some useful sub-objects from those entities.
-
-Because errors in TypeScript start with type `any` or `unknown`, you should use
-the `isNotionClientError` type guard to handle them in a type-safe way. Each
-`NotionClientError` type is uniquely identified by its `error.code`. Codes in
-the `APIErrorCode` enum are returned from the server. Codes in the
-`ClientErrorCode` enum are produced on the client.
-
-```ts
-try {
-  const response = await notion.databases.query({
-    /* ... */
-  })
-} catch (error: unknown) {
-  if (isNotionClientError(error)) {
-    // error is now strongly typed to NotionClientError
-    switch (error.code) {
-      case ClientErrorCode.RequestTimeout:
-        // ...
-        break
-      case APIErrorCode.ObjectNotFound:
-        // ...
-        break
-      case APIErrorCode.Unauthorized:
-        // ...
-        break
-      // ...
-      default:
-        // you could even take advantage of exhaustiveness checking
-        assertNever(error.code)
-    }
-  }
-}
-```
-
-#### Type guards
-
-There are several [type guards](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-differentiating-types)
-provided to distinguish between full and partial API responses.
-
-| Type guard function    | Purpose                                                                                |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `isFullPage`           | Determine whether an object is a full `PageObjectResponse`                             |
-| `isFullBlock`          | Determine whether an object is a full `BlockObjectResponse`                            |
-| `isFullDatabase`       | Determine whether an object is a full `DatabaseObjectResponse`                         |
-| `isFullPageOrDatabase` | Determine whether an object is a full `PageObjectResponse` or `DatabaseObjectResponse` |
-| `isFullUser`           | Determine whether an object is a full `UserObjectResponse`                             |
-| `isFullComment`        | Determine whether an object is a full `CommentObjectResponse`                          |
-
-Here is an example of using a type guard:
-
-```typescript
-const fullOrPartialPages = await notion.databases.query({
-  database_id: "897e5a76-ae52-4b48-9fdf-e71f5945d1af",
-})
-for (const page of fullOrPartialPages.results) {
-  if (!isFullPageOrDatabase(page)) {
-    continue
-  }
-  // The page variable has been narrowed from
-  //      PageObjectResponse | PartialPageObjectResponse | DatabaseObjectResponse | PartialDatabaseObjectResponse
-  // to
-  //      PageObjectResponse | DatabaseObjectResponse.
-  console.log("Created at:", page.created_time)
-}
-```
-
-### Utility functions
-
-This package also exports a few utility functions that are helpful for dealing with
-any of our paginated APIs.
-
-#### `iteratePaginatedAPI(listFn, firstPageArgs)`
-
-This utility turns any paginated API into an async iterator.
-
-**Parameters:**
-
-- `listFn`: Any function on the Notion client that represents a paginated API (i.e. accepts
-  `start_cursor`.) Example: `notion.blocks.children.list`.
-- `firstPageArgs`: Arguments that should be passed to the API on the first and subsequent calls
-  to the API, for example a `block_id`.
-
-**Returns:**
-
-An [async iterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_async_iterator_and_async_iterable_protocols)
-over results from the API.
-
-**Example:**
-
-```javascript
-for await (const block of iteratePaginatedAPI(notion.blocks.children.list, {
-  block_id: parentBlockId,
-})) {
-  // Do something with block.
-}
-```
-
-#### `collectPaginatedAPI(listFn, firstPageArgs)`
-
-This utility accepts the same arguments as `iteratePaginatedAPI`, but collects
-the results into an in-memory array.
-
-Before using this utility, check that the data you are dealing with is
-small enough to fit in memory.
-
-**Parameters:**
-
-- `listFn`: Any function on the Notion client that represents a paginated API (i.e. accepts
-  `start_cursor`.) Example: `notion.blocks.children.list`.
-- `firstPageArgs`: Arguments that should be passed to the API on the first and subsequent calls
-  to the API, for example a `block_id`.
-
-**Returns:**
-
-An array with results from the API.
-
-**Example:**
-
-```javascript
-const blocks = await collectPaginatedAPI(notion.blocks.children.list, {
-  block_id: parentBlockId,
-})
-// Do something with blocks.
-```
-
-## Requirements
-
-This package supports the following minimum versions:
-
-- Runtime: `node >= 12`
-- Type definitions (optional): `typescript >= 4.5`
-
-Earlier versions may still work, but we encourage people building new applications to upgrade to the current stable.
-
-## Getting help
-
-If you want to submit a feature request for Notion's API, or are experiencing any issues with the API platform, please email us at `developers@makenotion.com`.
-
-To report issues with the SDK, it is possible to [submit an issue](https://github.com/makenotion/notion-sdk-js/issues) to this repo. However, we don't monitor these issues very closely. We recommend you reach out to us at `developers@makenotion.com` instead.
