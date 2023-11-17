@@ -1,16 +1,12 @@
 const { getPagesFilter, updatePage, getPageTitleByID } = require("./notion/database/database.datalayer")();
 
 const moment = require('moment-timezone');
-// const { sendEmail } = require("./email/email.datalayer")();
 
 const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
 
 const notionTimezone = 'Europe/Moscow';
 
-/**
- * Local map to store task pageId to its last status.
- * { [pageId: string]: string }
- */
+
  const filterToRenameSessions = 
     {
       property: "Ренейм",
@@ -56,7 +52,6 @@ checkAndRenameSessions = async () => {
       }
     }
     updatePage(newPage);
-    //console.log(page.properties["Ренейм"].title[0].text.content)
   })
 }
 
@@ -73,9 +68,6 @@ function formatSessionHeadline(batch, actor, start, hours, notionTimezone) {
 
   return `[${batch}] - ${actor} - ${formattedStart}-${formattedEnd}`;
 }
-/**
- * Initialize local data store.
- * Then poll for changes every 30 seconds (30 * 1000 milliseconds).
- */
+
 setInterval(checkAndRenameSessions, 60 * 1000);
 
