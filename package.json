@@ -1,21 +1,18 @@
 {
-  "name": "database-update-send-email",
-  "version": "1.0.0",
-  "description": "Send an email with SendGrid when an update is made in Notion.",
+  "name": "database-update-watch",
+  "version": "0.0.1",
+  "description": "Whatch an update is made in Notion.",
   "main": "index.js",
-  "engines": {
-    "node": "12.x"
-  },
+  "engines": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "ts-run": "node --loader ts-node/esm index.ts"
   },
   "dependencies": {
-    "@notionhq/client": "file:../../",
-    "@sendgrid/mail": "^7.7.0",
-    "dotenv": "^16.0.1",
-    "ts-node": "^10.8.2"
+    "@notionhq/client": "^2.2.13",
+    "moment-timezone": "^0.5.43",
+    "nconf": "^0.12.1",
+    "path": "^0.12.7"
   },
-  "author": "Aman Gupta",
-  "license": "MIT"
+  "author": "dz0tto"
 }
