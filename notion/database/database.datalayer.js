@@ -91,6 +91,23 @@ module.exports = function () {
       }
     }
 
+    module.getEmailByPageID = async (pageId, property) => {
+      try {
+        var result = await notion.pages.retrieve({ page_id: pageId });
+        // check if property is array
+        if (Array.isArray(result.properties[property].people)) {
+          return result.properties[property].people.map((item) => {
+            return item.person.email
+          })
+        } else {
+          return result.properties[property] && result.properties[property].person ? [ result.properties[property].person.email ] : [];
+        }
+        
+      } catch (error) {
+        console.error(error.body)
+      }
+    }
+
     module.getPageBlocks = async (req) => {
       try {
         var arrBlocks = [];
@@ -287,30 +304,9 @@ module.exports = function () {
 
   getPageFilter = async function (filter, dbId, next_cursor) {
     var options = {
-      database_id: dbId,
-      filter: filter || {
-        "and": [
-          {
-            property: "Status",
-            select: {
-              equals : "Работаем",
-            },
-          }, 
-          {
-            property: "Код клиента",
-            text: {
-              is_not_empty : true,
-            },
-          }, 
-          {
-            property: "Ответственный",
-            people: {
-              contains : pm,
-            },
-          }
-        ]
-      },
+      database_id: dbId
     }
+    if (filter) options.filter = filter;
     if (next_cursor) options.start_cursor = next_cursor;
     return notion.databases.query(options);
   }
