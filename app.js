@@ -159,7 +159,7 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
   const role = Object.keys(people).find(key => people[key] === email || (Array.isArray(people[key]) && people[key].includes(email)));
   const task = page.properties["Задача"]?.title[0]?.plain_text || 'N/A';
 
-  if (role !== 'Постпрод') return false
+  // if (role !== 'Постпрод') return false
 
   // Format the Slack message block
   const slackMessage = {
