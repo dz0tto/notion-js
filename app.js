@@ -2,6 +2,8 @@ const { getPagesFilter, updatePage, getPageTitleByID, getEmailByPageID } = requi
 
 const moment = require('moment-timezone');
 
+require('moment/locale/ru');
+
 const Path = require('path');
 const Nconf = require('nconf');
 Nconf
@@ -91,16 +93,26 @@ checkChangedStatusSendNotif = async () => {
         const newStatus = page.properties["Status"].status.name;
         if (oldStatus !== newStatus) {
           // get emails from page
-          const director = page.properties["Режиссёр"].people[0]?.person?.email || "";
-          const postProd = page.properties["Постпрод"].people[0]?.person?.email || "";
-          const engineer = page.properties["Инженер"].people[0]?.person?.email || "";
           const batchID = page.properties["🚗 Батч"].relation[0].id;
+          const director = page.properties["Режиссёр"]?.people[0]?.person?.email || "";
+          const postProd = page.properties["Постпрод"]?.people[0]?.person?.email || "";
+          const engineer = page.properties["Инженер"]?.people[0]?.person?.email || "";
+          const soundqa = page.properties["Отслушка"]?.people[0]?.person?.email || "";
           const pms = await getEmailByPageID(batchID, "Менеджер батча");
-          const emails = [director, postProd, engineer, ...pms];
+          const people = { 
+            "Режиссёр" : director, 
+            "Постпрод" : postProd, 
+            "Инженер" : engineer,
+            "Отслушка" : soundqa,
+            "Менеджер батча" : [...pms]
+          };
+          const emails = [director, postProd, engineer, soundqa, ...pms].filter(email => email !== "")
           // send notification
           for (const email of emails) {
-            const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email);
-            if (message) slackNotifier.sendMessageToUser(email, message);
+            const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
+            if (message) {
+              slackNotifier.sendMessageToUser(email, message);
+            }
           }
           // update sessionStored
           const index = sessionStored.findIndex((session) => {
@@ -117,9 +129,10 @@ checkChangedStatusSendNotif = async () => {
 }
 
 //define formatSessionNotification
-async function formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email) {
+async function formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people) {
   // Function to format date and time
   const formatDateTime = (momentObj, format) => {
+    momentObj.locale('ru');
     return momentObj.tz(notionTimezone).format(format);
   };
 
@@ -143,27 +156,15 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
   const batchLink = `https://www.notion.so/${batchID}`.replace(/-/g, "");
   const actorID = page.properties["Актёр"].relation[0].id;
   const actor = await getPageTitleByID(actorID, "Name");
-  const director = page.properties["Режиссёр"]?.people[0]?.person?.email || "";
-  const postProd = page.properties["Постпрод"]?.people[0]?.person?.email || "";
-  const engineer = page.properties["Инженер"]?.people[0]?.person?.email || "";
-  const soundqa = page.properties["Отслушка"]?.people[0]?.person?.email || "";
-  const pms = page.properties["Менеджер батча"]?.relation?.map(pm => pm.person?.email) || [];
-  const people = { 
-    "Режиссёр" : director, 
-    "Постпрод" : postProd, 
-    "Инженер" : engineer,
-    "Отслушка" : soundqa,
-    "Менеджер батча" : [...pms]
-  };
+  
   // check if email is in people and get the role
   const role = Object.keys(people).find(key => people[key] === email || (Array.isArray(people[key]) && people[key].includes(email)));
-  const task = page.properties["Задача"]?.title[0]?.plain_text || 'N/A';
 
-  // if (role !== 'Постпрод') return false
+  // if (role !== 'Отслушка') return false
 
   // Format the Slack message block
   const slackMessage = {
-    "text" : `Изменение статуса (${oldStatus} -> ${newStatus}) сессии ${task}.`,
+    "text" : `Изменение статуса (${oldStatus} -> ${newStatus}) сессии.`,
     "blocks": [
       {
         "type": "header",
@@ -234,4 +235,6 @@ function formatSessionHeadline(batch, actor, start, hours, notionTimezone) {
 
 
 setInterval(checkChangedStatusSendNotif, 60 * 1000);
+
+setInterval(checkAndRenameSessions, 90 * 1000);
 
