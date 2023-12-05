@@ -193,37 +193,42 @@ async function checkAndDeleteEvents() {
 
                     // Check if the Notion page exists
                     const page = await getPageByPropertyID(databaseId, notionId);
-                    const status = page?.properties.Status.status.name;
+                    const status = page?.properties?.Status.status.name;
                     const notReady = notReadyStatuses.includes(status);
                     if (!page || notReady) {
                         // If the page doesn't exist or not ready, delete the event
                         await calendarGoogle.events.delete({
                             calendarId: '9t791q97fn0ae7otqmg1bvsirg@group.calendar.google.com',
                             eventId: event.id,
-                        });
-                        if (page && notReady) {
-                            page.properties["GCal"].rich_text = [
-                                {
-                                    "type": "text",
-                                    "text": {
-                                        "content": "",
-                                        "link": null
+                        }).then(() => { console.log(`Event ${event.id} deleted.`); })
+                        .finally(() => {
+                            if (page && notReady) {
+                                page.properties["GCal"].rich_text = [
+                                    {
+                                        "type": "text",
+                                        "text": {
+                                            "content": "",
+                                            "link": null
+                                        }
+                                    }
+                                    ]
+                                const newPage = {
+                                    page_id: page.id,
+                                    properties: {
+                                        "GCal": page.properties["GCal"],
                                     }
                                 }
-                                ]
-                            const newPage = {
-                                page_id: page.id,
-                                properties: {
-                                    "GCal": page.properties["GCal"],
-                                }
+                                updatePage(newPage);
                             }
-                            updatePage(newPage);
-                        }
-                        console.log(`Event ${event.id} deleted.`);
+                        });
+                        
                     }
                 }
                 const pagesPlanned = await getPagesFilter(plannedSessions, databaseId);
                 for (const page of pagesPlanned) {
+                    const status = page.properties["Status"].status.name;
+                    const notReady = notReadyStatuses.includes(status) || plannedStatuses.includes(status);
+                    if (!notReady) continue;
                     const calEventId = page.properties["GCal"].rich_text[0]?.plain_text;
                     if (!calEventId || calEventId === '') continue;
                     const event = events.find(e => e.id === calEventId);
