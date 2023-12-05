@@ -7,7 +7,7 @@ const { executePlanSessions } = require("./func/gcal-sync");
 
 executeCheckAndRenameSessions();
 
-//executeCheckChangedStatusSendNotif();
+executeCheckChangedStatusSendNotif();
 
-//executePlanSessions();
+executePlanSessions();
 
