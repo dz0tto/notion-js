@@ -224,38 +224,6 @@ async function checkAndDeleteEvents() {
                         
                     }
                 }
-                const pagesPlanned = await getPagesFilter(plannedSessions, databaseId);
-                for (const page of pagesPlanned) {
-                    const status = page.properties["Status"].status.name;
-                    const notReady = notReadyStatuses.includes(status) || plannedStatuses.includes(status);
-                    if (!notReady) continue;
-                    const calEventId = page.properties["GCal"].rich_text[0]?.plain_text;
-                    if (!calEventId || calEventId === '') continue;
-                    const event = events.find(e => e.id === calEventId);
-                    if (!event) {
-                        page.properties["GCal"].rich_text = [
-                            {
-                                "type": "text",
-                                "text": {
-                                    "content": "",
-                                    "link": null
-                                }
-                            }
-                            ]
-                        page.properties["Status"].status = {
-                            "name": "Необходимо",
-                            "color": "default"
-                        }
-                        const newPage = {
-                            page_id: page.id,
-                            properties: {
-                                "GCal": page.properties["GCal"],
-                                "Status": page.properties["Status"],
-                            }
-                        }
-                        updatePage(newPage);
-                    }
-                }
             } else {
                 console.log('No upcoming events found.');
             }
