@@ -197,7 +197,7 @@ async function checkAndDeleteEvents() {
                     const notReady = notReadyStatuses.includes(status);
                     if (!page || notReady) {
                         // If the page doesn't exist or not ready, delete the event
-                        await calendar.events.delete({
+                        await calendarGoogle.events.delete({
                             calendarId: '9t791q97fn0ae7otqmg1bvsirg@group.calendar.google.com',
                             eventId: event.id,
                         });
