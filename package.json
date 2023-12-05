@@ -11,6 +11,9 @@
   "dependencies": {
     "@notionhq/client": "^2.2.13",
     "@slack/web-api": "^6.10.0",
+    "google-auth-library": "^9.4.1",
+    "googleapis": "^129.0.0",
+    "js-base64": "^3.7.5",
     "moment-timezone": "^0.5.43",
     "nconf": "^0.12.1",
     "path": "^0.12.7"

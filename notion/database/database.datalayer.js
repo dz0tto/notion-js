@@ -82,12 +82,42 @@ module.exports = function () {
       }
     }
 
+    module.getPageByID = async (pageId) => {
+      try {
+        var result = await notion.pages.retrieve({ page_id: pageId });
+        return result
+      } catch (error) {
+        console.error(error.body)
+      }
+    }
+
+    module.getPageByPropertyID = async (databaseId, propertyId) => {
+      try {
+          var notEndFlag = true;
+          var next_cursor = false;
+          while (notEndFlag) {
+              var result = await getPageFilter(null, databaseId, next_cursor);
+              notEndFlag = result.has_more;
+              next_cursor = result.has_more ? result.next_cursor : false;
+              for (var i = 0; i < result.results.length; i++){
+                  if (result.results[i].properties["ID"].unique_id.number.toString() === propertyId) {
+                      return result.results[i];
+                  }
+              }
+          }
+          return false;
+      } catch (error) {
+          console.error(error.body)
+      }
+  }
+
     module.getPageTitleByID = async (pageId, property) => {
       try {
         var result = await notion.pages.retrieve({ page_id: pageId });
         return result.properties[property] && result.properties[property].title ? result.properties[property].title[0].plain_text: "";
       } catch (error) {
         console.error(error.body)
+        return "";
       }
     }
 
