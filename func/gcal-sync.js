@@ -77,19 +77,19 @@ async function checkAndSyncSessions () {
         for (const page of filteredPages) {
             try {
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;
-                if (!batchID || batchID === '') return;
+                if (!batchID || batchID === '') continue;
                 console.log(`Getting batch with ID: ${batchID}`);
                 const batch = await getPageTitleByID(batchID, "Название");
                 // const batchPage = await getPageByID(batchID);
                 const actorID = page.properties["Актёр"].relation[0]?.id;
-                if (!actorID || actorID === '') return;
+                if (!actorID || actorID === '') continue;
                 console.log(`Getting actor with ID: ${actorID}`);
                 const actor = await getPageTitleByID(actorID, "Name");
                 const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
                 let date = page.properties["Начало"].date.start;
-                if (!date || date === '') return;
+                if (!date || date === '') continue;
                 const hours = page.properties["Часы"].number;
-                if (!hours || hours === '') return;
+                if (!hours || hours === '') continue;
                 //get link from Zoom property
                 const zoomLink = page.properties["Zoom"].url;
                 //get text from ID property of ID type
@@ -101,7 +101,7 @@ async function checkAndSyncSessions () {
                 var desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
                 var subj = studio + " | " + actor + " | " + batch;
                 const tz = timezones[studio];
-                if (!tz || tz === '') return;
+                if (!tz || tz === '') continue;
                 const event = {
                     summary: subj,
                     description: desc,
@@ -225,7 +225,7 @@ async function checkAndDeleteEvents() {
                 const pagesPlanned = await getPagesFilter(plannedSessions, databaseId);
                 for (const page of pagesPlanned) {
                     const calEventId = page.properties["GCal"].rich_text[0]?.plain_text;
-                    if (!calEventId || calEventId === '') return;
+                    if (!calEventId || calEventId === '') continue;
                     const event = events.find(e => e.id === calEventId);
                     if (!event) {
                         page.properties["GCal"].rich_text = [

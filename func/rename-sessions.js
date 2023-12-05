@@ -11,7 +11,7 @@ require('moment/locale/ru');
     {
         property: "Ренейм",
         rich_text: {
-        equals : "#",
+            equals : "#",
         }
     }
 
@@ -42,13 +42,14 @@ require('moment/locale/ru');
         for (const page of pages) {
             try {
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;
-                if (!batchID) return;
+                // go to next page if batch is empty
+                if (!batchID) continue;
                 const batch = await getPageTitleByID(batchID, "Название");
                 const actorID = page.properties["Актёр"].relation[0]?.id;
-                if (!actorID) return;
+                if (!actorID) continue;
                 const actor = await getPageTitleByID(actorID, "Name");
                 const start = page.properties["Начало"].date?.start;
-                if (!start) return;
+                if (!start) continue;
                 const hours = page.properties["Часы"].number;
 
                 const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
