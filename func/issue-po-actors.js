@@ -29,6 +29,7 @@ async function checkAndIssuePO () {
                 const project = batchPage.properties["Проект"].relation[0]?.id;
                 const projectPage = await getPageByID(project);
                 const clientID = projectPage.properties["Заказчик"].relation[0]?.id;
+                if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
                 const client = clientPage.properties["Название"].title[0]?.plain_text;
                 const hours = page.properties["Часы"].number;

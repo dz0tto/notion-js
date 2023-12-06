@@ -76,7 +76,7 @@ async function checkAndSyncSessions () {
         });
         for (const page of filteredPages) {
             try {
-                const ev = pageToEvent(page);
+                const ev = await pageToEvent(page);
                     
                 calendar.events.insert({
                     auth: jwtClient,
