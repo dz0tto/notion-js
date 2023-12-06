@@ -6,6 +6,8 @@ const { updateGCalEvent } = require("../func/gcal-sync");
 const moment = require('moment-timezone');
 require('moment/locale/ru');
 
+const _ = require('lodash');
+
 const Path = require('path');
 const Nconf = require('nconf');
 Nconf
@@ -23,7 +25,7 @@ const sessionStored = [];
 
 const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
 
-async function checkChangedStatusSendNotif () {
+async function checkChangesSendNotif () {
     try {
         const pages = await getPagesFilter(null, databaseId)
         // save all pages to sessionStored
@@ -70,7 +72,7 @@ async function checkChangedStatusSendNotif () {
                 sessionStored[index] = page;
                 // update zoom calendar
             }
-            if (updateZoomCalendar(oldSession, page)) {
+            else if (updateDescription(oldSession, page, propWatchCal)) {
                 const index = sessionStored.findIndex((session) => {
                     return session.id === page.id
                 })
@@ -84,10 +86,27 @@ async function checkChangedStatusSendNotif () {
     }
 }
 
-function updateZoomCalendar(oldSession, newSession) {
-    const oldZoomCalendar = oldSession.properties["Zoom"].url;
-    const newZoomCalendar = newSession.properties["Zoom"].url;
-    if (oldZoomCalendar !== newZoomCalendar) {
+const propWatchCal = ["Актёр", "Студия", "Начало", "Часы", "Zoom", "ID"]
+
+function updateDescription(oldSession, newSession, propArray) {
+
+    // Initialize an array to store the changes
+    const changes = [];
+
+    // Iterate over the properties to watch
+    for (const prop of propArray) {
+        // Compare the property values in oldSession and newSession
+        if (!_.isEqual(oldSession.properties[prop], newSession.properties[prop])) {
+            // If the values are different, add the property to the changes array
+            changes.push(prop);
+        }
+    }
+
+
+
+
+
+    if (changes.length > 0) {
         // update zoom calendar
         const gcalEventId = newSession.properties["GCal"].rich_text[0].plain_text;
         if (gcalEventId && gcalEventId!='') {
@@ -98,6 +117,7 @@ function updateZoomCalendar(oldSession, newSession) {
         return false
     }
 }
+
     
     //define formatSessionNotification
 async function formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people) {
@@ -188,16 +208,16 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
     return slackMessage;
 }
     
-    module.exports.executeCheckChangedStatusSendNotif = function() {
-    checkChangedStatusSendNotif()
+    module.exports.executeCheckChangesSendNotif = function() {
+    checkChangesSendNotif()
         .then(() => {
             // Call succeeded, set next timeout
-            setTimeout(module.exports.executeCheckChangedStatusSendNotif, 60 * 1000);
+            setTimeout(module.exports.executeCheckChangesSendNotif, 60 * 1000);
         })
         .catch((error) => {
             console.error('An error occurred:', error);
     
             // Call failed, set next timeout
-            setTimeout(module.exports.executeCheckChangedStatusSendNotif, 60 * 1000);
+            setTimeout(module.exports.executeCheckChangesSendNotif, 60 * 1000);
         });
     }

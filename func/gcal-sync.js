@@ -76,72 +76,35 @@ async function checkAndSyncSessions () {
         });
         for (const page of filteredPages) {
             try {
-                const batchID = page.properties["🚗 Батч"].relation[0]?.id;
-                if (!batchID || batchID === '') continue;
-                console.log(`Getting batch with ID: ${batchID}`);
-                const batch = await getPageTitleByID(batchID, "Название");
-                // const batchPage = await getPageByID(batchID);
-                const actorID = page.properties["Актёр"].relation[0]?.id;
-                if (!actorID || actorID === '') continue;
-                console.log(`Getting actor with ID: ${actorID}`);
-                const actor = await getPageTitleByID(actorID, "Name");
-                const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
-                let date = page.properties["Начало"].date.start;
-                if (!date || date === '') continue;
-                const hours = page.properties["Часы"].number;
-                if (!hours || hours === '') continue;
-                //get link from Zoom property
-                const zoomLink = page.properties["Zoom"].url;
-                //get text from ID property of ID type
-                const id = page.properties["ID"].unique_id.number;
-                var dateStart = new Date(date);
-                var dateEnd = new Date(date);
-                dateEnd.setHours(dateEnd.getHours() + hours);
-                const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
-                var desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
-                var subj = studio + " | " + actor + " | " + batch;
-                const tz = timezones[studio];
-                if (!tz || tz === '') continue;
-                const event = {
-                    summary: subj,
-                    description: desc,
-                    start: {
-                        dateTime: dateStart,
-                        timeZone: tz,
-                    },
-                    end: {
-                        dateTime: dateEnd,
-                        timeZone: tz,
-                    },
-                    };
+                const ev = pageToEvent(page);
                     
-                    calendar.events.insert({
-                        auth: jwtClient,
-                        calendarId: studiCalId,
-                        resource: event,
-                        }, function(err, event) {
-                            if (err) {
-                                console.log('There was an error contacting the Calendar service: ' + err);
-                                return;
-                            }
-                            console.log('Event created: %s', event.data.htmlLink);
-                            page.properties["GCal"].rich_text = [
-                                {
-                                    "type": "text",
-                                    "text": {
-                                        "content": event.data.id,
-                                        "link": null
-                                    }
-                                }
-                                ]
-                            const newPage = {
-                                page_id: page.id,
-                                properties: {
-                                    "GCal": page.properties["GCal"],
+                calendar.events.insert({
+                    auth: jwtClient,
+                    calendarId: studiCalId,
+                    resource: ev,
+                    }, function(err, event) {
+                        if (err) {
+                            console.log('There was an error contacting the Calendar service: ' + err);
+                            return;
+                        }
+                        console.log('Event created: %s', event.data.htmlLink);
+                        page.properties["GCal"].rich_text = [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": event.data.id,
+                                    "link": null
                                 }
                             }
-                            updatePage(newPage);
-                    });
+                            ]
+                        const newPage = {
+                            page_id: page.id,
+                            properties: {
+                                "GCal": page.properties["GCal"],
+                            }
+                        }
+                        updatePage(newPage);
+                });
             }
             catch (error) {
                 console.error(error.body || error)
@@ -153,6 +116,48 @@ async function checkAndSyncSessions () {
     catch (error) {
         console.error(error.body || error)
     }
+}
+
+async function pageToEvent(page) {
+    const batchID = page.properties["🚗 Батч"].relation[0]?.id;
+    if (!batchID || batchID === '') return null;
+    console.log(`Getting batch with ID: ${batchID}`);
+    const batch = await getPageTitleByID(batchID, "Название");
+    // const batchPage = await getPageByID(batchID);
+    const actorID = page.properties["Актёр"].relation[0]?.id;
+    if (!actorID || actorID === '') return null;
+    console.log(`Getting actor with ID: ${actorID}`);
+    const actor = await getPageTitleByID(actorID, "Name");
+    const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
+    let date = page.properties["Начало"].date.start;
+    if (!date || date === '') return null;
+    const hours = page.properties["Часы"].number;
+    if (!hours || hours === '') return null;
+    //get link from Zoom property
+    const zoomLink = page.properties["Zoom"].url;
+    //get text from ID property of ID type
+    const id = page.properties["ID"].unique_id.number;
+    var dateStart = new Date(date);
+    var dateEnd = new Date(date);
+    dateEnd.setHours(dateEnd.getHours() + hours);
+    const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
+    var desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
+    var subj = studio + " | " + actor + " | " + batch;
+    const tz = timezones[studio];
+    if (!tz || tz === '') return null;
+    const event = {
+        summary: subj,
+        description: desc,
+        start: {
+            dateTime: dateStart,
+            timeZone: tz,
+        },
+        end: {
+            dateTime: dateEnd,
+            timeZone: tz,
+        },
+    };
+    return event;
 }
 
 async function checkAndDeleteEvents() {
@@ -255,15 +260,14 @@ module.exports.updateGCalEvent = function(eventId, page) {
             const event = await calendarGoogle.events.get({
                 calendarId: studiCalId,
                 eventId: eventId});
-            //get link from Zoom property
-            const zoomLink = page.properties["Zoom"].url;
-            //get text from ID property of ID type
-            const id = page.properties["ID"].unique_id.number;
 
-            const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
-            const desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
+            const ev = await pageToEvent(page);
+            if (ev === null) return null;
+            event.data.description = ev.description;
+            event.data.summary = ev.summary;
+            event.data.start = ev.start;
+            event.data.end = ev.end;
 
-            event.data.description = desc;
             calendarGoogle.events.update({
                 calendarId: studiCalId,
                 eventId: eventId,

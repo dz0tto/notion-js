@@ -1,13 +1,17 @@
 const { executeCheckAndRenameSessions } = require("./func/rename-sessions");
 
-const { executeCheckChangedStatusSendNotif } = require("./func/send-notif-sess");
+const { executeCheckChangesSendNotif } = require("./func/send-notif-sess");
 
 const { executePlanSessions } = require("./func/gcal-sync");
+
+const { executeIssuePOs } = require("./func/issue-po-actors");
 
 
 executeCheckAndRenameSessions();
 
-executeCheckChangedStatusSendNotif();
+executeCheckChangesSendNotif();
 
 executePlanSessions();
+
+executeIssuePOs();
 
