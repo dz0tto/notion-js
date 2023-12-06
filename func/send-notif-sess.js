@@ -103,13 +103,10 @@ function updateDescription(oldSession, newSession, propArray) {
     }
 
 
-
-
-
     if (changes.length > 0) {
         // update zoom calendar
-        const gcalEventId = newSession.properties["GCal"].rich_text[0].plain_text;
-        if (gcalEventId && gcalEventId!='') {
+        const gcalEventId = newSession.properties["GCal"].rich_text && newSession.properties["GCal"].rich_text.length > 0 ? newSession.properties["GCal"].rich_text[0].plain_text: null;
+        if (gcalEventId && gcalEventId !== '') {
             updateGCalEvent(gcalEventId, newSession);
         }
         return true

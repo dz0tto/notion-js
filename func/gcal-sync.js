@@ -70,11 +70,11 @@ async function checkAndSyncSessions () {
 
         
         const pages = await getPagesFilter(notPlannedSessions, databaseId)
-        const filteredPages = pages.filter(page => {
+        const notPlannedPages = pages.filter(page => {
             const statusName = page.properties.Status.status.name;
             return plannedStatuses.includes(statusName);
         });
-        for (const page of filteredPages) {
+        for (const page of notPlannedPages) {
             try {
                 const ev = await pageToEvent(page);
                     
@@ -110,6 +110,43 @@ async function checkAndSyncSessions () {
                 console.error(error.body || error)
             }
         };
+
+        const pPages = await getPagesFilter(plannedSessions, databaseId);
+        const plannedPages = pPages.filter(page => {
+            const statusName = page.properties.Status.status.name;
+            return plannedStatuses.includes(statusName);
+        });
+        for (const page of plannedPages) {
+            try {
+                const eventID = page.properties["GCal"].rich_text[0].plain_text;
+                if (!eventID) continue;
+                const event = await calendar.events.get({
+                    calendarId: studiCalId,
+                    eventId: eventID});
+                if (!event || event.data.status === "cancelled") {
+                    page.properties["GCal"].rich_text = [
+                        {
+                            "type": "text",
+                            "text": {
+                                "content": "",
+                                "link": null
+                            }
+                        }
+                        ]
+                    const newPage = {
+                        page_id: page.id,
+                        properties: {
+                            "GCal": page.properties["GCal"],
+                        }
+                    }
+                    updatePage(newPage);
+                }
+            }
+            catch (error) {
+                console.error(error.body || error)
+            }
+        }
+
 
         
     }
@@ -195,7 +232,7 @@ async function checkAndDeleteEvents() {
 
                     // Extract NotionID from event description
                     const notionId = event.description.match(/NotionID: (\d+)/)[1];
-
+                    if (!notionId) continue;
                     // Check if the Notion page exists
                     const page = await getPageByPropertyID(databaseId, notionId);
                     const status = page?.properties?.Status.status.name;
