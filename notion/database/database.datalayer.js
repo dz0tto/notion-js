@@ -82,6 +82,15 @@ module.exports = function () {
       }
     }
 
+    module.createPage = async (newPage) => {
+      try {
+        var result = await notion.pages.create(newPage);
+        return result;
+      } catch (error) {
+        console.error(error.body)
+      }
+    }
+
     module.getPageByID = async (pageId) => {
       try {
         var result = await notion.pages.retrieve({ page_id: pageId });
