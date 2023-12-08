@@ -6,7 +6,9 @@ const { executePlanSessions } = require("./func/gcal-sync");
 
 const { executeCheckAndCreateFinances } = require("./func/create-finances");
 
-const { executeIssuePOs } = require("./func/issue-po-actors");
+const { executeIssueActorsPOs } = require("./func/issue-po-actors");
+
+const { executeIssueStudioPOs } = require("./func/issue-po-studio");
 
 
 executeCheckAndRenameSessions();
@@ -17,5 +19,7 @@ executePlanSessions();
 
 executeCheckAndCreateFinances();
 
-executeIssuePOs();
+executeIssueActorsPOs();
+
+executeIssueStudioPOs();
 

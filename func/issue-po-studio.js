@@ -1,10 +1,15 @@
 const { getPagesFilter, updatePage, getPageTitleByID, getPageByID } = require("../notion/database/database.datalayer")();
 
-const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
+const databaseId = "26754db5110b4776b33613341851d368"
+
+const workersDBid = "f7ccc2961ec64482aca9a8509d50b3c8"
 
 // filter with empty property PO and status not "Необходимо", "Загружено", "Назначено"
-const notReadyStatuses = ["Необходимо", "Загружено", "Назначено"];
+const notReadyStatuses = ["Необходимо", "Назначено"];
 
+const notReadyPost = ["Записано", "Загружено"];
+
+const studioSessionTypes = ["Студия", "Режиссура", "Кнопка"];
 
 
 const filterToIssuePoSessions = {
@@ -16,30 +21,65 @@ const filterToIssuePoSessions = {
 async function checkAndIssuePO () {
     try {
         const pages = await getPagesFilter(filterToIssuePoSessions, databaseId);
+        const workers = await getPagesFilter(null, workersDBid);
         const filteredPages = pages.filter(page => {
-            const statusName = page.properties["Статус оплаты"].status.name;
-            return statusName === "Оплачено";
+            const statusName = page.properties["Статус сессии"]?.rollup?.array[0]?.status?.name;
+            return !notReadyStatuses.includes(statusName);
         });
         for (const page of filteredPages) {
             try {
-                const batchID = page.properties["🚗 Батч"].relation[0]?.id;
-                if (!batchID) return;
+                const jobType = page.properties["Тип работы"].select.name;
+                const statusName = page.properties["Статус сессии"]?.rollup?.array[0]?.status?.name;
+                if ((!studioSessionTypes.includes(jobType)) && notReadyPost.includes(statusName)) continue;
+
+                const sessionID = page.properties["Сессия"].relation[0]?.id;
+                if (!sessionID) continue;
+                const sessionPage = await getPageByID(sessionID);
+
+                const hoursSession = sessionPage.properties["Часы"].number;
+                const factHours = page.properties["Часы факт"].number;
+                const hours = factHours && factHours !== 0 ? factHours : hoursSession;
+
+                if (!hours || hours === 0) continue;
+
+                const batchID = sessionPage.properties["🚗 Батч"].relation[0]?.id;
+                if (!batchID) continue;
                 const batchPage = await getPageByID(batchID);
                 const llid = batchPage.properties["Код заказа с портала"].rich_text[0]?.plain_text;
+                if (!llid) continue;
                 const project = batchPage.properties["Проект"].relation[0]?.id;
                 const projectPage = await getPageByID(project);
                 const clientID = projectPage.properties["Заказчик"].relation[0]?.id;
                 if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
                 const client = clientPage.properties["Название"].title[0]?.plain_text;
-                const hours = page.properties["Часы"].number;
-                const defaultPrice = page.properties["За час"].rollup.number;
-                const specialPrice = page.properties["Спец. ставка"].number;
-                const price = specialPrice ? specialPrice : defaultPrice;
-                const currency = page.properties["Валюта"].rollup?.array[0].select?.name;
-                const actor = currency === "AMD" ? "Актер - EVN" : "Актер";
-                const subj = `[${llid}] ${page.properties["Задача"].title[0].plain_text}`;
-                const id = await postPO(client, subj, hours, price, actor);
+
+                const workerID = page.properties["Работник"]?.relation[0]?.id;
+                const workerPage = workers.find(worker => worker.id === workerID);
+                const worker = workerPage.properties["Name"].title[0]?.plain_text;
+
+                const hourlyPrice = workerPage.properties["Часовая"].number;
+                const directorPrice = workerPage.properties["Ставка за режиссуру"].number;
+                const buttonPrice = workerPage.properties["Ставка за кнопку"].number;
+
+
+
+                let price = 0;
+
+                switch (jobType) {
+                    case "Режиссура":
+                        price = directorPrice;
+                        break;
+                    case "Кнопка":
+                        price = buttonPrice;
+                        break;
+                    default:
+                        price = hourlyPrice;
+                }
+
+
+                const subj = `[${llid}] ${page.properties["Name"].title[0].plain_text}`;
+                const id = await postPO(client, subj, hours, price, worker);
                 page.properties["PO"].rich_text = [
                     {
                         "type": "text",
@@ -96,41 +136,17 @@ async function postPO(client, description, wc, rate, actor) {
     }
 }
 
-async function checkClient(client) {
-    if (client) {
-        const url = 'https://api.levsha.eu/api/connectors/checkClient';
-        const opt = {
-            "client": client,
-            "secret": "OURconnectorSECRETINNER",
-        }
-        try {
-            const response = await axios.post(url, opt);
-            if (response.data.length > 0) {
-                return response.data[0].text;
-            } else {
-                return "";
-            }
-        } catch (error) {
-            console.error(error);
-            return "";
-        }
-    } else {
-        return "";
-    }
-}
-
-
-module.exports.executeIssueActorsPOs = function() {
+module.exports.executeIssueStudioPOs = function() {
     checkAndIssuePO()
         .then(() => {
             // Call succeeded, set next timeout
-            setTimeout(module.exports.executeIssueActorsPOs, 90 * 1000);
+            setTimeout(module.exports.executeIssueStudioPOs, 90 * 1000);
         })
         .catch((error) => {
             console.error('An error occurred:', error);
 
             // Call failed, set next timeout
-            setTimeout(module.exports.executeIssueActorsPOs, 90 * 1000);
+            setTimeout(module.exports.executeIssueStudioPOs, 90 * 1000);
         });
 }
     
