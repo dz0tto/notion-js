@@ -53,6 +53,7 @@ async function checkAndIssuePO () {
                 if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
                 const client = clientPage.properties["Название"].title[0]?.plain_text;
+                const clientCode = clientPage.properties["Код клиента"].rich_text[0]?.plain_text;
 
                 const workerID = page.properties["Работник"]?.relation[0]?.id;
                 const workerPage = workers.find(worker => worker.id === workerID);
@@ -79,7 +80,7 @@ async function checkAndIssuePO () {
 
 
                 const subj = `[${llid}] ${page.properties["Name"].title[0].plain_text}`;
-                const id = await postPO(client, subj, hours, price, worker);
+                const id = await postPO(client, subj, hours, price, worker, clientCode);
                 page.properties["PO"].rich_text = [
                     {
                         "type": "text",
@@ -111,10 +112,12 @@ async function checkAndIssuePO () {
 const axios = require('axios');
 
 
-async function postPO(client, description, wc, rate, actor) {
-    const url = 'https://api.levsha.eu/api/connectors/actorPO';
+async function postPO(client, description, wc, rate, actor, clientCode) {
+    //const url = 'https://api.levsha.eu/api/connectors/actorPO';
+    const url = 'http://d479-51-144-91-154.ngrok-free.app/api/connectors/actorPO';
     const opt = {
         "client": client,
+        "clientCode": clientCode || "",
         "description": description,
         "wc": wc,
         "rate": rate,

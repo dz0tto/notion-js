@@ -6,7 +6,7 @@ const financeDBid = "26754db5110b4776b33613341851d368"
 
 const workersDBid = "f7ccc2961ec64482aca9a8509d50b3c8"
 
-const notReadyStatuses = ["Необходимо", "Назначено"];
+const notReadyStatuses = ["Необходимо"];
 
 
 
