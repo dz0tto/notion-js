@@ -45,20 +45,20 @@ async function checkAndCreateFinances () {
                         await createNotionPage({ sessionID: page.id, title: `Студия - ${subj}`, jobType: "Студия", workerID: studioID });
                     }
                     if (director !== "") {
-                        const directorID = workers.find(worker => !Object.keys(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Режиссёр"]?.people[0]?.id)?.id;
+                        const directorID = workers.find(worker => !Object.values(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Режиссёр"]?.people[0]?.id)?.id;
                         if (directorID) {
                             await createNotionPage({ sessionID: page.id, title: `Режиссер - ${subj}`, jobType: "Режиссура", workerID: directorID });
                         }
                     }
                     if (studio === "MSK" && engineer !== "") {
-                        const engineerID = workers.find(worker => !Object.keys(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Инженер"]?.people[0]?.id)?.id;
+                        const engineerID = workers.find(worker => !Object.values(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Инженер"]?.people[0]?.id)?.id;
                         if (engineerID) {
                             await createNotionPage({ sessionID: page.id, title: `Кнопка - ${subj}`, jobType: "Кнопка", workerID: engineerID });
                         }
                     }
                 }
                 if (postProd !== "") {
-                    const postprodID = workers.find(worker => !Object.keys(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Постпрод"]?.people[0]?.id && studioNames)?.id;
+                    const postprodID = workers.find(worker => !Object.values(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Постпрод"]?.people[0]?.id && studioNames)?.id;
                     if (postprodID) {
                         await createNotionPage({ sessionID: page.id, title: `Постпрод - ${subj}`, jobType: "Постпрод", workerID: postprodID });
                     }
