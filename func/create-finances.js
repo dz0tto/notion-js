@@ -56,6 +56,13 @@ async function checkAndCreateFinances () {
                             await createNotionPage({ sessionID: page.id, title: `Кнопка - ${subj}`, jobType: "Кнопка", workerID: engineerID });
                         }
                     }
+                } else if (studio === "Freelance") {
+                    if (director !== "") {
+                        const directorID = workers.find(worker => !Object.values(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Режиссёр"]?.people[0]?.id)?.id;
+                        if (directorID) {
+                            await createNotionPage({ sessionID: page.id, title: `Режиссер - ${subj}`, jobType: "Режиссура", workerID: directorID });
+                        }
+                    }
                 }
                 if (postProd !== "") {
                     const postprodID = workers.find(worker => !Object.values(studioNames).includes(worker.properties["Name"].title[0]?.plain_text) && worker.properties["Работник"]?.people[0]?.id === page.properties["Постпрод"]?.people[0]?.id && studioNames)?.id;
