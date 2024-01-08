@@ -142,8 +142,14 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
     const batchID = page.properties["🚗 Батч"].relation[0].id;
     const batch = await getPageTitleByID(batchID, "Название");
     const batchLink = `https://www.notion.so/${batchID}`.replace(/-/g, "");
-    const actorID = page.properties["Актёр"].relation[0].id;
-    const actor = await getPageTitleByID(actorID, "Name");
+    const actorID = page.properties["Актёр"].relation[0]?.id;
+    let actor = '';
+    if (!actorID || actorID === '') {
+        actor = '';
+    } else {
+        console.log(`Getting actor with ID: ${actorID}`);
+        actor = await getPageTitleByID(actorID, "Name");
+    }
     
     // check if email is in people and get the role
     const role = Object.keys(people).find(key => people[key] === email || (Array.isArray(people[key]) && people[key].includes(email)));
