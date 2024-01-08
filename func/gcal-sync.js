@@ -72,7 +72,8 @@ async function checkAndSyncSessions () {
         const pages = await getPagesFilter(notPlannedSessions, databaseId)
         const notPlannedPages = pages.filter(page => {
             const statusName = page.properties.Status.status.name;
-            return plannedStatuses.includes(statusName);
+            const renamed = page.properties["Ренейм"]?.rich_text[0]?.plain_text === "Renamed";
+            return plannedStatuses.includes(statusName) && renamed;
         });
         for (const page of notPlannedPages) {
             try {

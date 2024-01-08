@@ -28,7 +28,8 @@ async function checkAndCreateFinances () {
         const pages = await getPagesFilter(filterNoFinancesSessions, databaseId);
         const readyPages = pages.filter(page => {
             const statusName = page.properties.Status.status.name;
-            return !notReadyStatuses.includes(statusName);
+            const renamed = page.properties["Ренейм"]?.rich_text[0]?.plain_text === "Renamed";
+            return !notReadyStatuses.includes(statusName) && renamed;
         });
         for (const page of readyPages) {
             try {
