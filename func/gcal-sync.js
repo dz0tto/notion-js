@@ -162,9 +162,13 @@ async function pageToEvent(page) {
     const batch = await getPageTitleByID(batchID, "Название");
     // const batchPage = await getPageByID(batchID);
     const actorID = page.properties["Актёр"].relation[0]?.id;
-    if (!actorID || actorID === '') return null;
-    console.log(`Getting actor with ID: ${actorID}`);
-    const actor = await getPageTitleByID(actorID, "Name");
+    let actor = '';
+    if (!actorID || actorID === '') {
+        actor = '';
+    } else {
+        console.log(`Getting actor with ID: ${actorID}`);
+        actor = await getPageTitleByID(actorID, "Name");
+    }
     const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
     let date = page.properties["Начало"].date.start;
     if (!date || date === '') return null;

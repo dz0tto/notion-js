@@ -31,7 +31,8 @@ async function checkAndIssuePO () {
                 const clientID = projectPage.properties["Заказчик"].relation[0]?.id;
                 if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
-                const client = clientPage.properties["Название"].title[0]?.plain_text;
+                if (!clientPage) continue;
+                const client = clientPage.properties["Name"].title[0]?.plain_text;
                 const clientCode = clientPage.properties["Код клиента"].rich_text[0]?.plain_text;
                 const hours = page.properties["Часы"].number;
                 const defaultPrice = page.properties["За час"].rollup.number;
