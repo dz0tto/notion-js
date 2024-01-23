@@ -230,7 +230,7 @@ async function checkAndDeleteEvents() {
 
             const events = response.data.items;
             if (events.length) {
-                console.log('Upcoming events:');
+                console.log('Upcoming events: ', events.length);
                 for (const event of events) {
                     const start = event.start.dateTime || event.start.date;
                     //console.log(`${start} - ${event.summary}`);
@@ -242,7 +242,7 @@ async function checkAndDeleteEvents() {
                     // Check if the Notion page exists
                     const page = await getPageByPropertyID(databaseId, notionId);
                     const status = page?.properties?.Status.status.name;
-                    const notReady = notReadyStatuses.includes(status);
+                    const notReady = status && notReadyStatuses.includes(status);
                     if (!page || notReady) {
                         // If the page doesn't exist or not ready, delete the event
                         await calendarGoogle.events.delete({

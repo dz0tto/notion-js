@@ -117,6 +117,7 @@ module.exports = function () {
           return false;
       } catch (error) {
           console.error(error.body)
+          return "error"
       }
   }
 
