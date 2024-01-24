@@ -22,7 +22,7 @@ async function checkAndIssuePO () {
     try {
         const pages = await getPagesFilter(filterToIssuePoSessions, databaseId);
         const workers = await getPagesFilter(null, workersDBid);
-        const filteredPages = pages.filter(page => {
+        const filteredPages = pages?.filter(page => {
             const statusName = page.properties["Статус сессии"]?.rollup?.array[0]?.status?.name;
             return !notReadyStatuses.includes(statusName);
         });
@@ -32,11 +32,11 @@ async function checkAndIssuePO () {
                 const statusName = page.properties["Статус сессии"]?.rollup?.array[0]?.status?.name;
                 if ((!studioSessionTypes.includes(jobType)) && notReadyPost.includes(statusName)) continue;
 
-                const sessionID = page.properties["Сессия"].relation[0]?.id;
+                const sessionID = page?.properties["Сессия"].relation[0]?.id;
                 if (!sessionID) continue;
                 const sessionPage = await getPageByID(sessionID);
 
-                const hoursSession = sessionPage.properties["Часы"].number;
+                const hoursSession = sessionPage?.properties["Часы"].number;
                 const factHours = page.properties["Часы факт"].number;
                 const hours = factHours && factHours !== 0 ? factHours : hoursSession;
 
@@ -45,14 +45,15 @@ async function checkAndIssuePO () {
                 const batchID = sessionPage.properties["🚗 Батч"].relation[0]?.id;
                 if (!batchID) continue;
                 const batchPage = await getPageByID(batchID);
-                const llid = batchPage.properties["Код заказа с портала"].rich_text[0]?.plain_text;
+
+                const llid = batchPage?.properties["Код заказа с портала"].rich_text[0]?.plain_text;
                 if (!llid) continue;
                 const project = batchPage.properties["Проект"].relation[0]?.id;
                 const projectPage = await getPageByID(project);
-                const clientID = projectPage.properties["Заказчик"].relation[0]?.id;
+                const clientID = projectPage?.properties["Заказчик"].relation[0]?.id;
                 if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
-                if (!clientPage.properties["Name"]) continue;
+                if (!clientPage?.properties["Name"]) continue;
                 const client = clientPage.properties["Name"].title[0]?.plain_text;
                 const clientCode = clientPage.properties["Код клиента"].rich_text[0]?.plain_text;
 
