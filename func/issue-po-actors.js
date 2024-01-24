@@ -31,10 +31,11 @@ async function checkAndIssuePO () {
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;
                 if (!batchID) return;
                 const batchPage = await getPageByID(batchID);
-                const llid = batchPage.properties["Код заказа с портала"].rich_text[0]?.plain_text;
-                const project = batchPage.properties["Проект"].relation[0]?.id;
+                const llid = batchPage?.properties["Код заказа с портала"].rich_text[0]?.plain_text;
+                if (!clientID) continue;
+                const project = batchPage?.properties["Проект"].relation[0]?.id;
                 const projectPage = await getPageByID(project);
-                const clientID = projectPage.properties["Заказчик"].relation[0]?.id;
+                const clientID = projectPage?.properties["Заказчик"].relation[0]?.id;
                 if (!clientID) continue;
                 const clientPage = await getPageByID(clientID);
                 if (!clientPage) continue;

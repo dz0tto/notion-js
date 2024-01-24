@@ -70,7 +70,7 @@ async function checkAndSyncSessions () {
 
         
         const pages = await getPagesFilter(notPlannedSessions, databaseId)
-        const notPlannedPages = pages.filter(page => {
+        const notPlannedPages = pages?.filter(page => {
             const statusName = page.properties.Status.status.name;
             const renamed = page.properties["Ренейм"]?.rich_text[0]?.plain_text === "Renamed";
             return plannedStatuses.includes(statusName) && renamed;
@@ -113,7 +113,7 @@ async function checkAndSyncSessions () {
         };
 
         const pPages = await getPagesFilter(plannedSessions, databaseId);
-        const plannedPages = pPages.filter(page => {
+        const plannedPages = pPages?.filter(page => {
             const statusName = page.properties.Status.status.name;
             return plannedStatuses.includes(statusName);
         });
