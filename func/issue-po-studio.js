@@ -82,7 +82,7 @@ async function checkAndIssuePO () {
 
 
                 const subj = `[${llid}] ${page.properties["Name"].title[0].plain_text}`;
-                const id = await postPO(client, subj, hours, price, worker, clientCode);
+                const id = await postPO(client, subj, hours, price, worker, clientCode, llid);
                 page.properties["PO"].rich_text = [
                     {
                         "type": "text",
@@ -114,7 +114,7 @@ async function checkAndIssuePO () {
 const axios = require('axios');
 
 
-async function postPO(client, description, wc, rate, actor, clientCode) {
+async function postPO(client, description, wc, rate, actor, clientCode, taskID) {
     const url = 'https://api.levsha.eu/api/connectors/actorPO';
     //const url = 'http://d479-51-144-91-154.ngrok-free.app/api/connectors/actorPO';
     const opt = {
@@ -124,6 +124,7 @@ async function postPO(client, description, wc, rate, actor, clientCode) {
         "wc": wc,
         "rate": rate,
         "secret": "OURconnectorSECRETINNER",
+        'taskID': taskID || null,
     }
     if (actor) {
         opt.actor = actor;

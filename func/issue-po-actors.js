@@ -3,7 +3,7 @@ const { getPagesFilter, updatePage, getPageTitleByID, getPageByID } = require(".
 const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
 
 // filter with empty property PO and status not "Необходимо", "Загружено", "Назначено"
-const notReadyStatuses = ["Необходимо", "Загружено", "Назначено"];
+const notReadyStatuses = ["Необходимо", "Назначено"];
 
 
 
@@ -17,8 +17,14 @@ async function checkAndIssuePO () {
     try {
         const pages = await getPagesFilter(filterToIssuePoSessions, databaseId);
         const filteredPages = pages.filter(page => {
-            const statusName = page.properties["Статус оплаты"].status.name;
-            return statusName === "Оплачено";
+            const currency = page.properties["Валюта"].rollup?.array[0]?.select?.name;
+            if (currency === "RUB" || currency === "AMD") {
+                const statusName = page.properties["Статус оплаты"].status.name;
+                return statusName === "Оплачено"; }
+            else {
+                const statusName = page.properties.Status.status.name;
+                return !notReadyStatuses.includes(statusName);
+            }
         });
         for (const page of filteredPages) {
             try {
@@ -40,9 +46,18 @@ async function checkAndIssuePO () {
                 const price = specialPrice || specialPrice === 0 ? specialPrice : defaultPrice;
                 if (!price || price === 0) continue;
                 const currency = page.properties["Валюта"].rollup?.array[0].select?.name;
-                const actor = currency === "AMD" ? "Актер - EVN" : "Актер";
+                let actor = "Актер"
+                if (currency === "AMD") { actor = "Актер - EVN"; } 
+                else if (currency !== "RUB") {
+                    const actorID = page.properties["Актёр"]?.relation[0]?.id;
+                    if (!actorID) continue;
+                    const actorPage = await getPageByID(actorID);
+                    if (!actorPage) continue;
+                    actor = actorPage.properties["Name"].title[0]?.plain_text + " (VO)";
+                }
+                
                 const subj = `[${llid}] ${page.properties["Задача"].title[0].plain_text}`;
-                const id = await postPO(client, subj, hours, price, actor, clientCode);
+                const id = await postPO(client, subj, hours, price, actor, clientCode, llid);
                 page.properties["PO"].rich_text = [
                     {
                         "type": "text",
@@ -74,7 +89,7 @@ async function checkAndIssuePO () {
 const axios = require('axios');
 
 
-async function postPO(client, description, wc, rate, actor, clientCode) {
+async function postPO(client, description, wc, rate, actor, clientCode, taskID) {
     const url = 'https://api.levsha.eu/api/connectors/actorPO';
     //const url = 'http://d479-51-144-91-154.ngrok-free.app/api/connectors/actorPO';
     const opt = {
@@ -84,6 +99,7 @@ async function postPO(client, description, wc, rate, actor, clientCode) {
         "wc": wc,
         "rate": rate,
         "secret": "OURconnectorSECRETINNER",
+        'taskID': taskID || null,
     }
     if (actor) {
         opt.actor = actor;
