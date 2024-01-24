@@ -29,56 +29,56 @@ async function checkChangesSendNotif () {
     try {
         const pages = await getPagesFilter(null, databaseId)
         // save all pages to sessionStored
-    
+        if (!pages) return;
         for (const page of pages) {
-        // check if there is page in sessionStored
-        const oldSession = sessionStored.find((session) => { 
-            return session.id === page.id
-        })
-        if (!oldSession) {
-            // if no - add to sessionStored
-            sessionStored.push(page);
-        } else {
-            // if yes - check if status changed
-            const oldStatus = oldSession.properties["Status"].status.name;
-            const newStatus = page.properties["Status"].status.name;
-            if (oldStatus !== newStatus) {
-            // get emails from page
-                const batchID = page.properties["🚗 Батч"].relation[0].id;
-                const director = page.properties["Режиссёр"]?.people[0]?.person?.email || "";
-                const postProd = page.properties["Постпрод"]?.people[0]?.person?.email || "";
-                const engineer = page.properties["Инженер"]?.people[0]?.person?.email || "";
-                const soundqa = page.properties["Отслушка"]?.people[0]?.person?.email || "";
-                const pms = await getEmailByPageID(batchID, "Менеджер батча");
-                const people = { 
-                    "Режиссёр" : director, 
-                    "Постпрод" : postProd, 
-                    "Инженер" : engineer,
-                    "Отслушка" : soundqa,
-                    "Менеджер батча" : [...pms]
-                };
-                const emails = [director, postProd, engineer, soundqa, ...pms].filter(email => email !== "")
-                // send notification
-                for (const email of emails) {
-                    const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
-                    if (message) {
-                        slackNotifier.sendMessageToUser(email, message);
+            // check if there is page in sessionStored
+            const oldSession = sessionStored.find((session) => { 
+                return session.id === page.id
+            })
+            if (!oldSession) {
+                // if no - add to sessionStored
+                sessionStored.push(page);
+            } else {
+                // if yes - check if status changed
+                const oldStatus = oldSession.properties["Status"].status.name;
+                const newStatus = page.properties["Status"].status.name;
+                if (oldStatus !== newStatus) {
+                // get emails from page
+                    const batchID = page.properties["🚗 Батч"].relation[0].id;
+                    const director = page.properties["Режиссёр"]?.people[0]?.person?.email || "";
+                    const postProd = page.properties["Постпрод"]?.people[0]?.person?.email || "";
+                    const engineer = page.properties["Инженер"]?.people[0]?.person?.email || "";
+                    const soundqa = page.properties["Отслушка"]?.people[0]?.person?.email || "";
+                    const pms = await getEmailByPageID(batchID, "Менеджер батча");
+                    const people = { 
+                        "Режиссёр" : director, 
+                        "Постпрод" : postProd, 
+                        "Инженер" : engineer,
+                        "Отслушка" : soundqa,
+                        "Менеджер батча" : [...pms]
+                    };
+                    const emails = [director, postProd, engineer, soundqa, ...pms].filter(email => email !== "")
+                    // send notification
+                    for (const email of emails) {
+                        const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
+                        if (message) {
+                            slackNotifier.sendMessageToUser(email, message);
+                        }
                     }
+                    // update sessionStored
+                    const index = sessionStored.findIndex((session) => {
+                        return session.id === page.id
+                    })
+                    sessionStored[index] = page;
+                    // update zoom calendar
                 }
-                // update sessionStored
-                const index = sessionStored.findIndex((session) => {
-                    return session.id === page.id
-                })
-                sessionStored[index] = page;
-                // update zoom calendar
+                else if (updateDescription(oldSession, page, propWatchCal)) {
+                    const index = sessionStored.findIndex((session) => {
+                        return session.id === page.id
+                    })
+                    sessionStored[index] = page;
+                }
             }
-            else if (updateDescription(oldSession, page, propWatchCal)) {
-                const index = sessionStored.findIndex((session) => {
-                    return session.id === page.id
-                })
-                sessionStored[index] = page;
-            }
-        }
         } 
     }
     catch (error) {

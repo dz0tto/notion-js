@@ -16,7 +16,7 @@ const filterToIssuePoSessions = {
 async function checkAndIssuePO () {
     try {
         const pages = await getPagesFilter(filterToIssuePoSessions, databaseId);
-        const filteredPages = pages.filter(page => {
+        const filteredPages = pages?.filter(page => {
             const currency = page.properties["Валюта"].rollup?.array[0]?.select?.name;
             if (currency === "RUB" || currency === "AMD") {
                 const statusName = page.properties["Статус оплаты"].status.name;
@@ -26,6 +26,7 @@ async function checkAndIssuePO () {
                 return !notReadyStatuses.includes(statusName);
             }
         });
+        if (!filteredPages) return;
         for (const page of filteredPages) {
             try {
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;
