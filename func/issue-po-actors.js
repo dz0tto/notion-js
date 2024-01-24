@@ -32,7 +32,7 @@ async function checkAndIssuePO () {
                 if (!batchID) return;
                 const batchPage = await getPageByID(batchID);
                 const llid = batchPage?.properties["Код заказа с портала"].rich_text[0]?.plain_text;
-                if (!clientID) continue;
+                if (!llid) continue;
                 const project = batchPage?.properties["Проект"].relation[0]?.id;
                 const projectPage = await getPageByID(project);
                 const clientID = projectPage?.properties["Заказчик"].relation[0]?.id;
