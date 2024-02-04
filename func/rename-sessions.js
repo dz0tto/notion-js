@@ -52,7 +52,7 @@ require('moment/locale/ru');
                 const hours = page.properties["Часы"].number;
 
                 const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
-                const timezone = timezones[studio];
+                const timezone = timezones[studio] || 'Europe/Moscow';
 
                 page.properties["Задача"].title = [
                 {

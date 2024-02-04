@@ -236,7 +236,7 @@ async function checkAndDeleteEvents() {
                     //console.log(`${start} - ${event.summary}`);
 
                     // Extract NotionID from event description
-                    const idMatches = event.description.match(/NotionID: (\d+)/);
+                    const idMatches = event.description?.match(/NotionID: (\d+)/);
                     const notionId = idMatches ? idMatches[1] : null;
                     if (!notionId) continue;
                     // Check if the Notion page exists
