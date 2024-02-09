@@ -131,6 +131,16 @@ module.exports = function () {
       }
     }
 
+    module.deletePageByID = async (pageId) => {
+      try {
+        var result = await notion.pages.update({ page_id: pageId, archived: true });
+        return result;
+      } catch (error) {
+        console.error(error.body)
+        return false;
+      }
+    }
+
     module.getEmailByPageID = async (pageId, property) => {
       try {
         var result = await notion.pages.retrieve({ page_id: pageId });

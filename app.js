@@ -10,6 +10,10 @@ const { executeIssueActorsPOs } = require("./func/issue-po-actors");
 
 const { executeIssueStudioPOs } = require("./func/issue-po-studio");
 
+const { executeDeleteStudioPOs } = require("./func/issue-po-studio");
+
+// const { processSlackActions } = require("./func/slack-actions");
+
 
 executeCheckAndRenameSessions();
 
@@ -21,5 +25,25 @@ executeCheckAndCreateFinances();
 
 executeIssueActorsPOs();
 
+executeDeleteStudioPOs();
+
 executeIssueStudioPOs();
+
+
+// const express = require('express');
+// const bodyParser = require('body-parser');
+
+// const app = express();
+
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+// app.post('/slack/actions', (req, res) => {
+//     // Parse the `payload` body parameter into a JSON object
+//     processSlackActions(req, res);
+// });
+
+// app.listen(8080, () => {
+//     console.log('Server is running on port 3000');
+// });
+
 

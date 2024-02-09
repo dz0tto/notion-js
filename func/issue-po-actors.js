@@ -93,6 +93,7 @@ const axios = require('axios');
 
 async function postPO(client, description, wc, rate, actor, clientCode, taskID) {
     const url = 'https://api.levsha.eu/api/connectors/actorPO';
+    //const url = 'http://localhost:8810/api/connectors/actorPO';
     //const url = 'http://d479-51-144-91-154.ngrok-free.app/api/connectors/actorPO';
     const opt = {
         "client": client,

@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID, getPageByID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByID, getPageByID, deletePageByID } = require("../notion/database/database.datalayer")();
 
 const databaseId = "26754db5110b4776b33613341851d368"
 
@@ -18,6 +18,14 @@ const filterToIssuePoSessions = {
         is_empty: true,
     }
 }
+
+const filterToDelPoSessions = {
+    property: "Сессия",
+    relation: {
+        is_empty: true,
+    }
+}
+
 async function checkAndIssuePO () {
     try {
         const pages = await getPagesFilter(filterToIssuePoSessions, databaseId);
@@ -110,6 +118,33 @@ async function checkAndIssuePO () {
     }
 }
 
+async function checkAndDeletePO () {
+    try {
+        const pages = await getPagesFilter(filterToDelPoSessions, databaseId);
+        const filteredPages = pages?.filter(page => {
+            const sessionID = page?.properties["Сессия"].relation[0]?.id;
+            return !sessionID;
+        });
+        for (const page of filteredPages) {
+            try {
+                const poID = page?.properties["PO"].rich_text[0]?.plain_text;
+                
+                const deleted = poID ? await deletePO(poID) : false;
+
+                if (deleted.success || !poID) {
+                    await deletePageByID(page.id);
+                }
+            }
+            catch (error) {
+                console.error(error.body || error)
+            }
+        }
+    }
+    catch (error) {
+        console.error(error.body || error)
+    }
+}
+
 
 const axios = require('axios');
 
@@ -142,6 +177,26 @@ async function postPO(client, description, wc, rate, actor, clientCode, taskID) 
     }
 }
 
+async function deletePO(poID) {
+    const url = 'https://api.levsha.eu/api/connectors/actorPO';
+    //const url = 'http://localhost:8810/api/connectors/deletePO';
+    const opt = {
+        "secret": "OURconnectorSECRETINNER",
+        'id': poID || null,
+    }
+    try {
+        const response = await axios.post(url, opt);
+        if (response.data.error) {
+            return "";
+        } else {
+            return response.data;
+        }
+    } catch (error) {
+        console.error(error);
+        return "";
+    }
+}
+
 module.exports.executeIssueStudioPOs = function() {
     checkAndIssuePO()
         .then(() => {
@@ -153,6 +208,20 @@ module.exports.executeIssueStudioPOs = function() {
 
             // Call failed, set next timeout
             setTimeout(module.exports.executeIssueStudioPOs, 90 * 1000);
+        });
+}
+
+module.exports.executeDeleteStudioPOs = function() {
+    checkAndDeletePO()
+        .then(() => {
+            // Call succeeded, set next timeout
+            setTimeout(module.exports.executeDeleteStudioPOs, 90 * 1000);
+        })
+        .catch((error) => {
+            console.error('An error occurred:', error);
+
+            // Call failed, set next timeout
+            setTimeout(module.exports.executeDeleteStudioPOs, 90 * 1000);
         });
 }
     
