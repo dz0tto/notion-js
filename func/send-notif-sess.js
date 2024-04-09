@@ -55,7 +55,8 @@ async function checkChangesSendNotif () {
                         "Постпрод" : postProd, 
                         "Инженер" : engineer,
                         "Отслушка" : soundqa,
-                        "Менеджер батча" : [...pms]
+                        "Менеджер батча" : [...pms],
+                        "Админ": "dzotto@levsha.eu"
                     };
                     const emails = [director, postProd, engineer, soundqa, ...pms].filter(email => email !== "")
                     // send notification
