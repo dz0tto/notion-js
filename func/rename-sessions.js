@@ -46,7 +46,12 @@ require('moment/locale/ru');
                 if (!batchID) continue;
                 const batch = await getPageTitleByID(batchID, "Название");
                 const actorID = page.properties["Актёр"].relation[0]?.id;
-                const actor = (!actorID) ? "Техническая" : await getPageTitleByID(actorID, "Name");
+                const currName = result.properties["Задача"] && result.properties["Задача"].title ? result.properties["Задача"].title[0].plain_text: "";
+                const actor = (!actorID) 
+                    ? currName !== "" 
+                        ? currName
+                        : "Техническая"
+                    : await getPageTitleByID(actorID, "Name");
                 const start = page.properties["Начало"].date?.start;
                 if (!start) continue;
                 const hours = page.properties["Часы"].number;
