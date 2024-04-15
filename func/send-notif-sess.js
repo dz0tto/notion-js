@@ -56,9 +56,10 @@ async function checkChangesSendNotif () {
                         "Инженер" : engineer,
                         "Отслушка" : soundqa,
                         "Менеджер батча" : [...pms],
-                        "Админ": "dzotto@levsha.eu"
+                        "Админ" : "dzotto@levsha.eu"
                     };
-                    const emails = [director, postProd, engineer, soundqa, ...pms].filter(email => email !== "")
+                    const admin = "dzotto@levsha.eu";
+                    const emails = [director, postProd, engineer, soundqa, admin, ...pms].filter(email => email !== "")
                     // send notification
                     for (const email of emails) {
                         const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
