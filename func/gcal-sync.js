@@ -181,7 +181,7 @@ async function pageToEvent(page) {
     const id = page.properties["ID"].unique_id.number;
     var dateStart = new Date(date);
     var dateEnd = new Date(date);
-    dateEnd.setHours(dateEnd.getHours() + hours);
+    dateEnd.setMinutes(dateEnd.getMinutes() + hours * 60);
     const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
     var desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
     var subj = studio + " | " + actor + " | " + batch;
