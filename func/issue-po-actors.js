@@ -42,7 +42,9 @@ async function checkAndIssuePO () {
                 if (!clientPage) continue;
                 const client = clientPage.properties["Name"].title[0]?.plain_text;
                 const clientCode = clientPage.properties["Код клиента"].rich_text[0]?.plain_text;
-                const hours = page.properties["Часы"].number;
+                const hoursSession = page.properties["Часы"].number;
+                const hoursFact = page.properties["Часы актера"].number;
+                const hours = hoursFact || hoursFact === 0 ? hoursFact : hoursSession;
                 const defaultPrice = page.properties["За час"].rollup.number;
                 const specialPrice = page.properties["Спец. ставка"].number;
                 const price = specialPrice || specialPrice === 0 ? specialPrice : defaultPrice;
