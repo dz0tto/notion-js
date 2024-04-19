@@ -12,12 +12,18 @@ const { executeIssueStudioPOs } = require("./func/issue-po-studio");
 
 const { executeDeleteStudioPOs } = require("./func/issue-po-studio");
 
+const { executeSyncGSheetActors } = require("./func/sync-gsheet-actors");
+
+const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
+
 // const { processSlackActions } = require("./func/slack-actions");
 
 
 executeCheckAndRenameSessions();
+executeSyncGSheetActors();
 
 executeCheckChangesSendNotif();
+executeSyncGSheetSessions();
 
 executePlanSessions();
 
