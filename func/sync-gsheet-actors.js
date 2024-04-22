@@ -360,19 +360,32 @@ async function syncGSheetActors () {
             page.properties["Валюта"].select !== null && 
             (page.properties["Валюта"].select.name === 'RUB' || (page.properties["Валюта"].select && page.properties["Валюта"].select.name === 'AMD'))
         );
+        for (const page of actorsStored) {
+            // check if there is page in actorsStored
+            const newActor = actors.find((actor) => { 
+                return actor.id === page.id
+            })
+            if (!newActor) {
+                // if no - delete from actorsStored
+                const index = actorsStored.findIndex((actor) => {
+                    return actor.id === page.id
+                })
+                actorsStored.splice(index, 1);
+            }
+        }
         for (const page of actors) {
-            // check if there is page in sessionStored
+            // check if there is page in actorsStored
             const oldActor = actorsStored.find((actor) => { 
                 return actor.id === page.id
             })
             if (!oldActor) {
-                // if no - add to sessionStored
+                // if no - add to actorsStored
                 actorsStored.push(page);
             } else if (updateDescription(oldActor, page, propWatchCal)) {
-                const index = sessionStored.findIndex((session) => {
-                    return session.id === page.id
+                const index = actorsStored.findIndex((actor) => {
+                    return actor.id === page.id
                 })
-                sessionStored[index] = page;
+                actorsStored[index] = page;
             }
         }
         await syncGSheet(actorsStored);
