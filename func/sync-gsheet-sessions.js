@@ -1,7 +1,8 @@
   
 
-const { getPagesFilter, getPageByID, createPage, updatePage } = require("../notion/database/database.datalayer")();
+const { getPageByID, createPage, updatePage } = require("../notion/database/database.datalayer")();
 
+const { sendNotificationSession } = require("./send-notif-sess");
 
 const moment = require('moment-timezone');
 require('moment/locale/ru');
@@ -152,6 +153,7 @@ async function syncGSheet() {
             const sheetName = sheetSession.sheetName;
             for (const session of sheetSession.data) {
                 const newPage = await createSessionPage(databaseId, session);
+                sendNotificationSession(newPage, "Создано в GSheet", "Назначено");
                 await updateRowGSheet(sheets, sheetName, session, newPage);
             }
         }
@@ -163,6 +165,7 @@ async function syncGSheet() {
             const sheetName = sheetSession.sheetName;
             for (const session of sheetSession.data) {
                 const updatedPage = await updateSessionPage(databaseId, session);
+                sendNotificationSession(updatedPage, "Внесены изменения", "Назначено");
                 await updateRowGSheet(sheets, sheetName, session, updatedPage);
             }
         }

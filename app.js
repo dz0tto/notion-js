@@ -19,21 +19,21 @@ const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 // const { processSlackActions } = require("./func/slack-actions");
 
 
-executeCheckAndRenameSessions();
-executeSyncGSheetActors();
+//executeCheckAndRenameSessions();
+//executeSyncGSheetActors();
 
-executeCheckChangesSendNotif();
+//executeCheckChangesSendNotif();
 executeSyncGSheetSessions();
 
-executePlanSessions();
+//executePlanSessions();
 
-executeCheckAndCreateFinances();
+//executeCheckAndCreateFinances();
 
-executeIssueActorsPOs();
+//executeIssueActorsPOs();
 
-executeDeleteStudioPOs();
+//executeDeleteStudioPOs();
 
-executeIssueStudioPOs();
+//executeIssueStudioPOs();
 
 
 // const express = require('express');
