@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByID, getPageByID } = require("../notion/database/database.datalayer")();
 const moment = require('moment-timezone');
 require('moment/locale/ru');
 
@@ -22,7 +22,7 @@ require('moment/locale/ru');
         'Freelance': 'Europe/Moscow'
     }
 
-    function formatSessionHeadline(batch, actor, start, hours, notionTimezone) {
+    function formatSessionHeadline(batch, mic, bitHz, actor, start, hours, notionTimezone) {
         const formatDateTime = (momentObj, format) => {
             return momentObj.tz(notionTimezone).format(format);
         };
@@ -33,7 +33,7 @@ require('moment/locale/ru');
         const formattedStart = formatDateTime(startDate, 'DD MMMM, HH:mm');
         const formattedEnd = formatDateTime(endDate, 'HH:mm');
       
-        return `[${batch}] - ${actor} - ${formattedStart}-${formattedEnd}`;
+        return `[${batch}]-[${mic}|${bitHz}] - ${actor} - ${formattedStart}-${formattedEnd}`;
       }
 
     async function checkAndRenameSessions () {
@@ -44,7 +44,8 @@ require('moment/locale/ru');
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;
                 // go to next page if batch is empty
                 if (!batchID) continue;
-                const batch = await getPageTitleByID(batchID, "Название");
+                const batchPage = await getPageByID(batchID);
+                const batch = batchPage.properties["Название"].title[0].plain_text;
                 const actorID = page.properties["Актёр"].relation[0]?.id;
                 const currName = page.properties["Задача"] && page.properties["Задача"].title ? page.properties["Задача"].title[0].plain_text: "";
                 const actor = (!actorID) 
@@ -55,6 +56,10 @@ require('moment/locale/ru');
                 const start = page.properties["Начало"].date?.start;
                 if (!start) continue;
                 const hours = page.properties["Часы"].number;
+                //get mic from batch page
+                const mic = batchPage.properties["Микрофон"].select ? batchPage.properties["Микрофон"].select.name : "";
+                //get Bit/Hz from batch page from text field
+                const bitHz = batchPage.properties["Bit/Hz"].rich_text ? batchPage.properties["Bit/Hz"].rich_text[0].plain_text : "";
 
                 const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
                 const timezone = timezones[studio] || 'Europe/Moscow';
@@ -63,7 +68,7 @@ require('moment/locale/ru');
                 {
                     "type": "text",
                     "text": {
-                        "content": formatSessionHeadline(batch, actor, start, hours, timezone),
+                        "content": formatSessionHeadline(batch, mic, bitHz, actor, start, hours, timezone),
                         "link": null
                     }
                 }

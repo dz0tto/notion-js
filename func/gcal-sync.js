@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID, getPageByPropertyID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByID, getPageByPropertyID, getPageByID } = require("../notion/database/database.datalayer")();
 
 const Path = require('path');
 const Nconf = require('nconf');
@@ -160,8 +160,16 @@ async function pageToEvent(page) {
     const batchID = page.properties["🚗 Батч"].relation[0]?.id;
     if (!batchID || batchID === '') return null;
     console.log(`Getting batch with ID: ${batchID}`);
-    const batch = await getPageTitleByID(batchID, "Название");
-    // const batchPage = await getPageByID(batchID);
+
+    const batchPage = await getPageByID(batchID);
+
+    const batch = batchPage.properties["Название"].title[0].plain_text;
+
+    //get mic from batch page
+    const mic = batchPage.properties["Микрофон"].select ? batchPage.properties["Микрофон"].select.name : "";
+    //get Bit/Hz from batch page from text field
+    const bitHz = batchPage.properties["Bit/Hz"].rich_text ? batchPage.properties["Bit/Hz"].rich_text[0].plain_text : "";
+    
     const actorID = page.properties["Актёр"].relation[0]?.id;
     let actor = '';
     if (!actorID || actorID === '') {
@@ -184,7 +192,7 @@ async function pageToEvent(page) {
     dateEnd.setMinutes(dateEnd.getMinutes() + hours * 60);
     const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
     var desc = `NotionID: ${id}\nZoom: ${zoomLink}\n\nNotion: ${link}`;
-    var subj = studio + " | " + actor + " | " + batch;
+    var subj = studio  + " |" + mic  + "|" + bitHz + "| " + actor + " | " + batch;
     const tz = timezones[studio];
     if (!tz || tz === '') return null;
     const event = {
