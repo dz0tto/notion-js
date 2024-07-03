@@ -9,6 +9,7 @@
     "ts-run": "node --loader ts-node/esm index.ts"
   },
   "dependencies": {
+    "@mattermost/client": "^9.9.0",
     "@notionhq/client": "^2.2.13",
     "@slack/web-api": "^6.10.0",
     "google-auth-library": "^9.4.1",

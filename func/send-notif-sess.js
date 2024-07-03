@@ -15,9 +15,15 @@ Nconf
 .file(Path.join(Path.dirname(require.main.filename), 'credentials.json'));
 
 
-const SlackNotifier = require('../slack/slack');
+const SlackNotifier = require('../messengers/slack');
 const slackToken = Nconf.get("SLACK_NOTIF_SESS_TOKEN"); // Replace with your Slack app's token
 const slackNotifier = new SlackNotifier(slackToken);
+
+const MattermostNotifier = require('../messengers/mm');
+const mmUrl = Nconf.get("MATTERMOST_URL");
+const mmUsername = Nconf.get("MATTERMOST_USERNAME");
+const mmPassword = Nconf.get("MATTERMOST_PASSWORD");
+const mattermostNotifier = new MattermostNotifier(mmUrl, mmUsername, mmPassword);
 
 const notionTimezone = 'Europe/Moscow';
 
@@ -86,8 +92,11 @@ async function notify(page, oldStatus, newStatus) {
     // send notification
     for (const email of emails) {
         const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
-        if (message) {
-            slackNotifier.sendMessageToUser(email, message);
+        if (message.slackMessage && email !== "" && email !== undefined) {
+            //slackNotifier.sendMessageToUser(email, message.slackMessage);
+        }
+        if (message.mattermostMessage && email !== "" && email !== undefined) {
+            mattermostNotifier.sendMessageToUser(email, message.mattermostMessage);
         }
     }
 }
@@ -217,8 +226,22 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
         "text": `<${link}|Посмотреть в Notion>`
         }
     });
+
+    // Format the Mattermost message
+    let mattermostMessage = `Изменение статуса (${oldStatus} -> ${newStatus}) сессии.\n\n` +
+        `**Батч**: [${batch}](${batchLink})\n` +
+        `**Актёр**: ${actor}\n` +
+        `**Время**: ${formattedStart} - ${formattedEnd} MSK\n\n` +
+        `**Сменился статус:**\n${oldStatus} -> ${newStatus}\n` +
+        `**Ваша роль:**\n${role}\n`;
+
+    if (role !== 'Менеджер батча' && roleDeadlines[role]) {
+        mattermostMessage += `**Ваш дедлайн:**\n${roleDeadlines[role]} MSK\n`;
+    }
+
+    mattermostMessage += `[Посмотреть в Notion](${link})`;
     
-    return slackMessage;
+    return { slackMessage, mattermostMessage };
 }
     
     module.exports.executeCheckChangesSendNotif = function() {
