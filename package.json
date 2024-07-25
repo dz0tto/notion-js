@@ -18,6 +18,7 @@
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.43",
     "nconf": "^0.12.1",
+    "node-telegram-bot-api": "^0.66.0",
     "path": "^0.12.7"
   },
   "author": "dz0tto"

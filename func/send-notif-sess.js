@@ -92,9 +92,9 @@ async function notify(page, oldStatus, newStatus) {
     // send notification
     for (const email of emails) {
         const message = await formatSessionNotification(page, oldStatus, newStatus, notionTimezone, email, people);
-        if (message.slackMessage && email !== "" && email !== undefined) {
-            slackNotifier.sendMessageToUser(email, message.slackMessage);
-        }
+        // if (message.slackMessage && email !== "" && email !== undefined) {
+        //     slackNotifier.sendMessageToUser(email, message.slackMessage);
+        // }
         if (message.mattermostMessage && email !== "" && email !== undefined) {
             mattermostNotifier.sendMessageToUser(email, message.mattermostMessage);
         }

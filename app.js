@@ -16,8 +16,11 @@ const { executeSyncGSheetActors } = require("./func/sync-gsheet-actors");
 
 const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 
+const tgBot = require("./messengers/telegram");
+
 // const { processSlackActions } = require("./func/slack-actions");
 
+tgBot.startBot();
 
 executeCheckAndRenameSessions();
 executeSyncGSheetActors();
