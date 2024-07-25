@@ -16,7 +16,11 @@ const { executeSyncGSheetActors } = require("./func/sync-gsheet-actors");
 
 const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 
+const tgBot = require("./messengers/telegram");
+
 // const { processSlackActions } = require("./func/slack-actions");
+
+tgBot.startBot();
 
 executeCheckAndRenameSessions();
 executeSyncGSheetActors();
@@ -34,30 +38,21 @@ executeDeleteStudioPOs();
 
 executeIssueStudioPOs();
 
-const bot = require("./messengers/telegram");
 
-const express = require('express');
-const bodyParser = require('body-parser');
+// const express = require('express');
+// const bodyParser = require('body-parser');
 
-const app = express();
+// const app = express();
 
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 
-// Replace with your public URL
-const url = 'dzotto-slack.azurewebsites.net';
-const port = process.env.PORT || 3000;
+// app.post('/slack/actions', (req, res) => {
+//     // Parse the `payload` body parameter into a JSON object
+//     processSlackActions(req, res);
+// });
 
-// Set up the webhook
-bot.setWebHook(`${url}/bot${bot.token}`);
-
-// Event listener for incoming updates
-app.post(`/bot${bot.token}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
-
-app.listen(port, () => {
-    console.log('Server is running on port ' + port);
-});
+// app.listen(8080, () => {
+//     console.log('Server is running on port 3000');
+// });
 
 
