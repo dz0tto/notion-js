@@ -221,7 +221,7 @@ async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBl
     
     const link = `https://www.notion.so/${newpage.id.replace(/-/g, '')}`;
 
-    let mattermostMessage = `${lastEditedByName.name} edited [${pageTitle}](${link}).\n`;
+    let mattermostMessage = `${lastEditedByName? lastEditedByName.name : 'Automation'} edited [${pageTitle}](${link}).\n`;
     mattermostMessage = await formatChangedNotionProps(newpage, oldPageFull, changedProps, mattermostMessage);
     //add all changed blocks to the message
     if (changedBodyBlocks.length > 0) { 
