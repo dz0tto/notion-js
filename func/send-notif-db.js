@@ -247,7 +247,7 @@ function formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage) {
             text = formatChangedNotionBlocks(block.children, text);
         }
         //add text to the message sanitized as for markdown
-        mattermostMessage += `${text}\n`;
+        mattermostMessage += `${text.split('\n').map((line) => `> ${line}`).join('\n')}\n`;
     }
     return mattermostMessage;
 }
@@ -286,7 +286,7 @@ async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBl
     //add all changed blocks to the message
     if (changedBodyBlocks.length > 0) { 
         mattermostMessage += `**Описание:**\n`
-        mattermostMessage = formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage).split('\n').map((line) => `> ${line}`).join('\n');
+        mattermostMessage = formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage);
         mattermostMessage += `\n`
     }
 
