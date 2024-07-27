@@ -47,7 +47,7 @@ require('moment/locale/ru');
                 const batchPage = await getPageByID(batchID);
                 const batch = batchPage.properties["Название"].title[0].plain_text;
                 const actorID = page.properties["Актёр"].relation[0]?.id;
-                const currName = page.properties["Задача"] && page.properties["Задача"].title ? page.properties["Задача"].title[0].plain_text: "";
+                const currName = page.properties["Задача"] && page.properties["Задача"].title && page.properties["Задача"].title[0] ? page.properties["Задача"].title[0].plain_text: "";
                 const actor = (!actorID) 
                     ? currName !== "" 
                         ? currName

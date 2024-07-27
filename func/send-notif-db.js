@@ -20,11 +20,55 @@ const mattermostNotifier = new MattermostNotifier(mmUrl, mmUsername, mmPassword)
 
 
 
-const pagesStored = [];
+const pagesStored = new Map();
 
 const wahtchedList = [
     { dbID: "889eacd877d0479489071bfb2daef99a", channel: "crm-notifications" }
 ]
+
+class RateLimiter {
+    constructor(limit) {
+        this.tokens = limit;
+        this.queue = [];
+    }
+
+    async call(func) {
+        if (this.tokens > 0) {
+            this.tokens--;
+            await func();
+            setTimeout(() => {
+                this.tokens++;
+                this.processQueue();
+            }, 1000);
+        } else {
+            return new Promise(resolve => {
+                this.queue.push(() => {
+                    this.call(func).then(resolve);
+                });
+            });
+        }
+    }
+
+    processQueue() {
+        if (this.queue.length > 0 && this.tokens > 0) {
+            const nextFunc = this.queue.shift();
+            nextFunc();
+        }
+    }
+}
+
+const rateLimiter = new RateLimiter(3);
+
+async function updatePageChildren(pageId) {
+    return rateLimiter.call(async () => {
+        const children = await getAllLevelChildren(pageId);
+        const page = pagesStored.get(pageId);
+        if (page) {
+            page.children = children;
+        }
+    });
+}
+
 
 async function checkChangesPageSendNotif () {
     for (const db of wahtchedList) {
@@ -32,16 +76,15 @@ async function checkChangesPageSendNotif () {
             const pages = await getPagesFilter(null, db.dbID)
             // save all pages to pagesStored
             if (!pages) return;
+            const updatePromises = [];
             for (const newpage of pages) {
                 // check if there is page in pagesStored
-                const oldPageFull = pagesStored.find((page) => { 
-                    return page.id === newpage.id
-                })
+                const oldPageFull = pagesStored.get(newpage.id);
                 if (!oldPageFull) {
                     // if no - add to pagesStored
-                    newpage.children = await getAllLevelChildren(newpage.id);
-                    pagesStored.push(newpage);
-                    console.log('Added to pages monitores, totalStored: ', pagesStored?.length);
+                    updatePromises.push(updatePageChildren(newpage.id));
+                    pagesStored.set(newpage.id, newpage);
+                    console.log('Added to pages monitores, totalStored: ', pagesStored.size);
                 } else if (oldPageFull.last_edited_time === newpage.last_edited_time) {
                     continue;
                 }
@@ -82,14 +125,12 @@ async function checkChangesPageSendNotif () {
                     }
                     if (changed || changedBody) {
                         await notify(db.channel, newpage, oldPageFull, changedProps, changedBodyBlocks);
-                        // update pagesStored
-                        const index = pagesStored.findIndex((page) => {
-                            return page.id === newpage.id
-                        })
-                        pagesStored[index] = newpage;
+                        // update pagesStored map
+                        pagesStored.set(newpage.id, newpage);
                     }
                 }
-            } 
+            }
+            await Promise.all(updatePromises); 
         }
         catch (error) {
             console.error(error.body || error)
