@@ -14,8 +14,8 @@ Nconf
 
 const MattermostNotifier = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
-const mmUsername = Nconf.get("MATTERMOST_USERNAME");
-const mmPassword = Nconf.get("MATTERMOST_PASSWORD");
+const mmUsername = Nconf.get("MATTERMOST_NOTION_USERNAME");
+const mmPassword = Nconf.get("MATTERMOST_NOTION_PASSWORD");
 const mattermostNotifier = new MattermostNotifier(mmUrl, mmUsername, mmPassword);
 
 
@@ -80,7 +80,7 @@ async function checkChangesPageSendNotif () {
             for (const newpage of pages) {
                 // check if there is page in pagesStored
                 const oldPageFull = pagesStored.get(newpage.id);
-                if (!oldPageFull) {
+                if (!oldPageFull || !oldPageFull.children) {
                     // if no - add to pagesStored
                     updatePromises.push(updatePageChildren(newpage.id));
                     pagesStored.set(newpage.id, newpage);
@@ -105,6 +105,7 @@ async function checkChangesPageSendNotif () {
                     const newPageBody = await getAllLevelChildren(newpage.id);
                     let changedBody = false;
                     let changedBodyBlocks = [];
+                    let changedBodyBlockLastEdited = new Set();
                     if (newPageBody) {
                         //iterate over blocks in body array
                         for (let i = 0; i < newPageBody.length; i++) {
@@ -113,24 +114,27 @@ async function checkChangesPageSendNotif () {
                             let oldBlock = oldPageBody ? oldPageBody.find((block) => {
                                 return block.id === newBlock.id
                             }) : null;
-                            if (oldBlock && !_.isEqual(newBlock, oldBlock)) {
+                            if (oldBlock && oldBlock.last_edited_time !== newBlock.last_edited_time) {
                                 changedBody = true;
                                 changedBodyBlocks.push(newBlock);
                             } else if (!oldBlock) {
                                 changedBody = true;
                                 changedBodyBlocks.push(newBlock);
                             }
+                            if (changedBody) {
+                                changedBodyBlockLastEdited.add(newBlock.last_edited_by.id, '');
+                            }
                         }
                         newpage.children = newPageBody;
                     }
                     if (changed || changedBody) {
-                        await notify(db.channel, newpage, oldPageFull, changedProps, changedBodyBlocks);
+                        await notify(db.channel, newpage, oldPageFull, changedProps, changedBodyBlocks, changedBodyBlockLastEdited);
                         // update pagesStored map
                         pagesStored.set(newpage.id, newpage);
                     }
                 }
             }
-            await Promise.all(updatePromises); 
+            await Promise.all(updatePromises).then((v) => { console.log('Pages updated with children blocks: ', v.length) });
         }
         catch (error) {
             console.error(error.body || error)
@@ -237,7 +241,7 @@ function formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage) {
         } else if (block.type === 'unsupported') {
             text = 'Unsupported block type';
         }
-        text = (text !== '') ? `\`${text.replace(/([_*~`])/g, '\\$1')}\`` : '';
+        text = (text !== '') ? `${text.replace(/([_*~`])/g, '\\$1')}` : '';
         if (block.children) {
             text += '\n';
             text = formatChangedNotionBlocks(block.children, text);
@@ -248,10 +252,23 @@ function formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage) {
     return mattermostMessage;
 }
 
-async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBlocks) {
+async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBlocks, blocksEditors) {
     const lastEditedBy = newpage.last_edited_by;
     //get name by id from notion
-    const lastEditedByName = await getUser(lastEditedBy.id);
+    if (!blocksEditors) {
+        //iterate through blocksEditors and get all names
+        blocksEditors = new Map([...blocksEditors]);
+        for (const [key, value] of blocksEditors) {
+            if (key) {
+                const editor = await getUser(key);
+                blocksEditors.set(key, editor ? editor.name : 'Automation');
+            }
+        }
+    }
+    if (!blocksEditors.get(lastEditedBy.id)) {
+        const lastEditedByName = await getUser(lastEditedBy.id);
+        blocksEditors.set(lastEditedBy.id, lastEditedByName ? lastEditedByName.name : 'Automation');
+    }
     //iterate through properties object and find one with title and get plain_text
     let pageTitle = '';
     for (const prop in newpage.properties) {
@@ -263,12 +280,14 @@ async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBl
     
     const link = `https://www.notion.so/${newpage.id.replace(/-/g, '')}`;
 
-    let mattermostMessage = `${lastEditedByName? lastEditedByName.name : 'Automation'} edited [${pageTitle}](${link}).\n`;
+    let authors = blocksEditors.size > 0 ? [...blocksEditors.values()].map((item) => item).join(', ') : 'Unknown user';
+
+    let mattermostMessage = `${authors} edited [${pageTitle}](${link}).\n`;
     mattermostMessage = await formatChangedNotionProps(newpage, oldPageFull, changedProps, mattermostMessage);
     //add all changed blocks to the message
     if (changedBodyBlocks.length > 0) { 
-        mattermostMessage += `**Описание:**\n` 
-        mattermostMessage = formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage);
+        mattermostMessage += `**Описание:**\n`
+        mattermostMessage = formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage).split('\n').map((line) => `> ${line}`).join('\n');
         mattermostMessage += `\n`
     }
 
