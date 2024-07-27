@@ -41,6 +41,7 @@ async function checkChangesPageSendNotif () {
                     // if no - add to pagesStored
                     newpage.children = await getAllLevelChildren(newpage.id);
                     pagesStored.push(newpage);
+                    console.log('Added to pages monitores, totalStored: ', pagesStored?.length);
                 } else if (oldPageFull.last_edited_time === newpage.last_edited_time) {
                     continue;
                 }
