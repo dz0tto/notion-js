@@ -105,7 +105,7 @@ async function checkChangesPageSendNotif () {
                     const newPageBody = await getAllLevelChildren(newpage.id);
                     let changedBody = false;
                     let changedBodyBlocks = [];
-                    let changedBodyBlockLastEdited = new Set();
+                    let changedBodyBlockLastEdited = new Map();
                     if (newPageBody) {
                         //iterate over blocks in body array
                         for (let i = 0; i < newPageBody.length; i++) {
@@ -122,7 +122,7 @@ async function checkChangesPageSendNotif () {
                                 changedBodyBlocks.push(newBlock);
                             }
                             if (changedBody) {
-                                changedBodyBlockLastEdited.add(newBlock.last_edited_by.id, '');
+                                changedBodyBlockLastEdited.set(newBlock.last_edited_by.id, '');
                             }
                         }
                         newpage.children = newPageBody;
@@ -255,13 +255,12 @@ function formatChangedNotionBlocks(changedBodyBlocks, mattermostMessage) {
 async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBlocks, blocksEditors) {
     const lastEditedBy = newpage.last_edited_by;
     //get name by id from notion
-    if (!blocksEditors) {
-        //iterate through blocksEditors and get all names
-        blocksEditors = new Map([...blocksEditors]);
+    if (blocksEditors) {
+        //iterate through blocksEditors and get all names by id
         for (const [key, value] of blocksEditors) {
             if (key) {
-                const editor = await getUser(key);
-                blocksEditors.set(key, editor ? editor.name : 'Automation');
+                const user = await getUser(key);
+                blocksEditors.set(key, user ? user.name : 'Automation');
             }
         }
     }
