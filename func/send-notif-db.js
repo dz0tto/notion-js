@@ -245,12 +245,12 @@ async function notify(channel, newpage, oldPageFull, changedProps, changedBodyBl
     checkChangesPageSendNotif()
         .then(() => {
             // Call succeeded, set next timeout
-            setTimeout(module.exports.executeCheckChangesPageSendNotif, 60 * 1000);
+            setTimeout(module.exports.executeCheckChangesPageSendNotif, 3 * 60 * 1000);
         })
         .catch((error) => {
             console.error('An error occurred:', error);
     
             // Call failed, set next timeout
-            setTimeout(module.exports.executeCheckChangesPageSendNotif, 60 * 1000);
+            setTimeout(module.exports.executeCheckChangesPageSendNotif, 3* 60 * 1000);
         });
     }
