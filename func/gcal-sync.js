@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID, getPageByPropertyID, getPageByID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByIDnName, getPageByPropertyID, getPageByID } = require("../notion/database/database.datalayer")();
 
 const Path = require('path');
 const Nconf = require('nconf');
@@ -176,7 +176,7 @@ async function pageToEvent(page) {
         actor = '';
     } else {
         console.log(`Getting actor with ID: ${actorID}`);
-        actor = await getPageTitleByID(actorID, "Name");
+        actor = await getPageTitleByIDnName(actorID, "Name");
     }
     const studio = page.properties["Студия"].multi_select.map(v => v.name).join(", ");
     let date = page.properties["Начало"].date.start;

@@ -1,4 +1,5 @@
-const NotionHQ = require("@notionhq/client")
+const NotionHQ = require("@notionhq/client");
+const { get } = require("lodash");
 
 module.exports = function () {
 
@@ -121,10 +122,27 @@ module.exports = function () {
       }
   }
 
-    module.getPageTitleByID = async (pageId, property) => {
+    module.getPageTitleByIDnName = async (pageId, property) => {
       try {
         var result = await notion.pages.retrieve({ page_id: pageId });
         return result.properties[property] && result.properties[property].title ? result.properties[property].title[0].plain_text: "";
+      } catch (error) {
+        console.error(error.body)
+        return "";
+      }
+    }
+
+    module.getPageTitleID = async (pageId) => {
+      try {
+        var result = await notion.pages.retrieve({ page_id: pageId });
+        let pageTitle = "";
+        for (const prop in result.properties) {
+          if (result.properties[prop].title) {
+              pageTitle = result.properties[prop].title[0].plain_text;
+              break;
+          }
+      }
+        return pageTitle
       } catch (error) {
         console.error(error.body)
         return "";
@@ -175,6 +193,40 @@ module.exports = function () {
       } catch (error) {
         console.error(error.body)
       }
+    }
+
+    async function getOneLevelBlocks (pageID) {
+      try {
+        var arrBlocks = [];
+        var notEndFlag = true;
+        var next_cursor = false;
+        while (notEndFlag) {
+          var result = await getPageBlocks(pageID, next_cursor);
+          notEndFlag = result.has_more;
+          next_cursor = result.has_more ? result.next_cursor : false;
+          for (var i = 0; i < result.results.length; i++){
+            arrBlocks.push(result.results[i]);
+          }
+        }
+        return arrBlocks;
+      } catch (error) {
+        console.error(error.body)
+      }
+    }
+
+    module.getAllLevelChildren = async (pageID) => {
+       try {
+        let arrBlocks = await getOneLevelBlocks(pageID);
+        if (!arrBlocks) return [];
+        for (let i = 0; i < arrBlocks.length; i++) {
+          if (arrBlocks[i].has_children) {
+            arrBlocks[i].children = await getOneLevelBlocks(arrBlocks[i].id);
+          }
+        }
+        return arrBlocks;
+       } catch (error) {
+          console.error(error.body)
+       }    
     }
 
     async function getPageBlocks(pageID, next_cursor) {
@@ -383,7 +435,16 @@ module.exports = function () {
     } catch (error) {
       console.error(error.body)
     }
-}
+  }
+
+  module.getUser = async (id) => {
+    try {
+      var user = await notion.users.retrieve({ user_id: id });
+      return user;
+    } catch (error) {
+      console.error(error.body)
+    }
+  }
 
 async function getUsers(name, next_cursor) {
   var options = {

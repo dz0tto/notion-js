@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID, getPageByID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByIDnName, getPageByID } = require("../notion/database/database.datalayer")();
 const moment = require('moment-timezone');
 require('moment/locale/ru');
 
@@ -52,7 +52,7 @@ require('moment/locale/ru');
                     ? currName !== "" 
                         ? currName
                         : "Техническая"
-                    : await getPageTitleByID(actorID, "Name");
+                    : await getPageTitleByIDnName(actorID, "Name");
                 const start = page.properties["Начало"].date?.start;
                 if (!start) continue;
                 const hours = page.properties["Часы"].number;

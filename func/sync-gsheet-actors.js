@@ -1,6 +1,6 @@
   
 
-const { getPagesFilter, getPageTitleByID, createPage } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, getPageTitleByIDnName, createPage } = require("../notion/database/database.datalayer")();
 
 const _ = require('lodash');
 

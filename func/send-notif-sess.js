@@ -1,6 +1,6 @@
   
 
-const { getPagesFilter, getPageTitleByID, getEmailByPageID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, getPageTitleByIDnName, getEmailByPageID } = require("../notion/database/database.datalayer")();
 const { updateGCalEvent } = require("../func/gcal-sync");
 
 const moment = require('moment-timezone');
@@ -15,9 +15,9 @@ Nconf
 .file(Path.join(Path.dirname(require.main.filename), 'credentials.json'));
 
 
-const SlackNotifier = require('../messengers/slack');
-const slackToken = Nconf.get("SLACK_NOTIF_SESS_TOKEN"); // Replace with your Slack app's token
-const slackNotifier = new SlackNotifier(slackToken);
+// const SlackNotifier = require('../messengers/slack');
+// const slackToken = Nconf.get("SLACK_NOTIF_SESS_TOKEN"); // Replace with your Slack app's token
+// const slackNotifier = new SlackNotifier(slackToken);
 
 const MattermostNotifier = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
@@ -159,7 +159,7 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
     // Constructing message content
     const link = `https://www.notion.so/${databaseId}?p=${page.id.replace(/-/g, "")}&pm=s`;
     const batchID = page.properties["🚗 Батч"].relation[0].id;
-    const batch = await getPageTitleByID(batchID, "Название");
+    const batch = await getPageTitleByIDnName(batchID, "Название");
     const batchLink = `https://www.notion.so/${batchID}`.replace(/-/g, "");
     const actorID = page.properties["Актёр"].relation[0]?.id;
     let actor = '';
@@ -167,7 +167,7 @@ async function formatSessionNotification(page, oldStatus, newStatus, notionTimez
         actor = '';
     } else {
         console.log(`Getting actor with ID: ${actorID}`);
-        actor = await getPageTitleByID(actorID, "Name");
+        actor = await getPageTitleByIDnName(actorID, "Name");
     }
     
     // check if email is in people and get the role

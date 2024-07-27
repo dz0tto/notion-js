@@ -16,6 +16,8 @@ const { executeSyncGSheetActors } = require("./func/sync-gsheet-actors");
 
 const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 
+const { executeCheckChangesPageSendNotif } = require("./func/send-notif-db");
+
 const tgBot = require("./messengers/telegram");
 
 // const { processSlackActions } = require("./func/slack-actions");
@@ -38,6 +40,7 @@ executeDeleteStudioPOs();
 
 executeIssueStudioPOs();
 
+executeCheckChangesPageSendNotif();
 
 // const express = require('express');
 // const bodyParser = require('body-parser');

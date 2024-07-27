@@ -1,4 +1,4 @@
-const { getPagesFilter, updatePage, getPageTitleByID, getPageByID, deletePageByID } = require("../notion/database/database.datalayer")();
+const { getPagesFilter, updatePage, getPageTitleByIDnName, getPageByID, deletePageByID } = require("../notion/database/database.datalayer")();
 
 const databaseId = "26754db5110b4776b33613341851d368"
 

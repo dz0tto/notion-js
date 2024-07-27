@@ -48,6 +48,22 @@ class MattermostNotifier {
       console.error('Error sending message:', error);
     }
   }
+
+  async sendMessageToChannel(channelName, message) {
+    try {
+      const channel = await this.mattermostClient.getChannelByNameAndTeamName('levsha', channelName);
+      if (channel) {
+        await this.mattermostClient.createPost({
+          channel_id: channel.id,
+          message: message
+        });
+      } else {
+        console.error('Channel not found');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }
 }
 
 module.exports = MattermostNotifier;
