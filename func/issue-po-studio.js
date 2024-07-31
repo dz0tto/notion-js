@@ -125,6 +125,7 @@ async function checkAndDeletePO () {
             const sessionID = page?.properties["Сессия"].relation[0]?.id;
             return !sessionID;
         });
+        if (!filteredPages) return;
         for (const page of filteredPages) {
             try {
                 const poID = page?.properties["PO"].rich_text[0]?.plain_text;
