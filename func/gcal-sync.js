@@ -117,6 +117,10 @@ async function checkAndSyncSessions () {
             const statusName = page.properties.Status.status.name;
             return plannedStatuses.includes(statusName);
         });
+        if (!plannedPages) return;
+        if (typeof plannedPages[Symbol.iterator] !== 'function') {
+            return;
+        }
         for (const page of plannedPages) {
             try {
                 const eventID = page.properties["GCal"].rich_text[0].plain_text;

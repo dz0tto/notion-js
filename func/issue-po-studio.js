@@ -126,6 +126,10 @@ async function checkAndDeletePO () {
             return !sessionID;
         });
         if (!filteredPages) return;
+        //check filteredPages if iterable
+        if (typeof filteredPages[Symbol.iterator] !== 'function') {
+            return;
+        }
         for (const page of filteredPages) {
             try {
                 const poID = page?.properties["PO"].rich_text[0]?.plain_text;

@@ -39,6 +39,7 @@ require('moment/locale/ru');
     async function checkAndRenameSessions () {
     try {
         const pages = await getPagesFilter(filterToRenameSessions, databaseId)
+        if (!pages) return;
         for (const page of pages) {
             try {
                 const batchID = page.properties["🚗 Батч"].relation[0]?.id;

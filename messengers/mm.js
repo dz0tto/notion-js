@@ -75,7 +75,7 @@ class MattermostBot {
 
   async sendMessageAsBot(channelId, message, attachments) {
     try {
-      const post = {
+      let post = {
         message: message,
         props: { from_webhook: 'true' }
       }
@@ -87,7 +87,7 @@ class MattermostBot {
       }
       await this.mattermostClient.createPost(post);
     } catch (error) {
-      console.error('Error sending message as bot:', error);
+      console.error('Error sending message as bot: ', error);
     }
   }
 }

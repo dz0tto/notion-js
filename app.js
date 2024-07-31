@@ -20,7 +20,7 @@ const { executeCheckChangesPageSendNotif } = require("./func/send-notif-db");
 
 const tgBot = require("./messengers/telegram");
 
-// const { processSlackActions } = require("./func/slack-actions");
+const { processTildaReq } = require("./func/tilda-request");
 
 tgBot.startBot();
 
@@ -42,20 +42,20 @@ executeIssueStudioPOs();
 
 executeCheckChangesPageSendNotif();
 
-// const express = require('express');
-// const bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-// const app = express();
+const app = express();
 
-// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// app.post('/slack/actions', (req, res) => {
-//     // Parse the `payload` body parameter into a JSON object
-//     processSlackActions(req, res);
-// });
+app.post('/webhook/tilda', (req, res) => {
+    // Parse the `payload` body parameter into a JSON object
+    processTildaReq(req, res);
+});
 
-// app.listen(8080, () => {
-//     console.log('Server is running on port 3000');
-// });
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
 
 
