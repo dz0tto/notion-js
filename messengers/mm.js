@@ -66,4 +66,31 @@ class MattermostNotifier {
   }
 }
 
+class MattermostBot {
+  constructor(url, botToken) {
+    this.mattermostClient = new Client4();
+    this.mattermostClient.setUrl(url);
+    this.mattermostClient.setToken(botToken);
+  }
+
+  async sendMessageAsBot(channelId, message, attachments) {
+    try {
+      const post = {
+        message: message,
+        props: { from_webhook: 'true' }
+      }
+      if (channelId !== '') {
+        post.channel_id = channelId
+      }
+      if (attachments) {
+        post.attachments = attachments;
+      }
+      await this.mattermostClient.createPost(post);
+    } catch (error) {
+      console.error('Error sending message as bot:', error);
+    }
+  }
+}
+
 module.exports = MattermostNotifier;
+module.exports = MattermostBot;
