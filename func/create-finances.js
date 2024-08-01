@@ -92,12 +92,12 @@ async function checkAndCreateFinances () {
                 await updatePage(newPage);
             }
             catch (error) {
-                console.error(error.body || error)
+                console.error("Error in checkAndCreateFinances for ready page: " + error.body || error)
             }
         }
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in checkAndCreateFinances: " + error.body || error)
     }
 }
 

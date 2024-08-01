@@ -92,12 +92,12 @@ require('moment/locale/ru');
                 }
                 updatePage(newPage);
             } catch (error) {
-                console.error(error.body || error)
+                console.error("Error in renaming session: " + error.body || error)
             }
         }
     } 
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in renaming sessions: " + error.body || error)
     }
     }
 

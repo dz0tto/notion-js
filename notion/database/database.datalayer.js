@@ -31,7 +31,7 @@ module.exports = function () {
           }
           return arrEmails;
         } catch (error) {
-          console.error(error.body)
+          console.error("Error in Filtering CRM DB: " + error.body || error)
         }
     }
 
@@ -70,7 +70,7 @@ module.exports = function () {
         var result = await notion.databases.update(updatedDatabase);
         return result;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Updating Database: " + error.body || error)
       }
     }
 
@@ -79,7 +79,7 @@ module.exports = function () {
         var result = await notion.pages.update(updatedPage);
         return result;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Updating Page: " + error.body || error)
       }
     }
 
@@ -88,7 +88,7 @@ module.exports = function () {
         var result = await notion.pages.create(newPage);
         return result;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Creating Page: " + error.body || error)
       }
     }
 
@@ -97,7 +97,7 @@ module.exports = function () {
         var result = await notion.pages.retrieve({ page_id: pageId });
         return result
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Page by ID: " + error.body || error)
       }
     }
 
@@ -117,7 +117,7 @@ module.exports = function () {
           }
           return false;
       } catch (error) {
-          console.error(error.body)
+          console.error("Error in Getting Page by Property ID: " + error.body || error)
           return "error"
       }
   }
@@ -127,7 +127,7 @@ module.exports = function () {
         var result = await notion.pages.retrieve({ page_id: pageId });
         return result.properties[property] && result.properties[property].title ? result.properties[property].title[0].plain_text: "";
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Page Title by ID: " + error.body || error)
         return "";
       }
     }
@@ -144,7 +144,7 @@ module.exports = function () {
       }
         return pageTitle
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Page Title by ID: " + error.body || error)
         return "";
       }
     }
@@ -154,7 +154,7 @@ module.exports = function () {
         var result = await notion.pages.update({ page_id: pageId, archived: true });
         return result;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Deleting Page by ID: " + error.body || error)
         return false;
       }
     }
@@ -172,7 +172,7 @@ module.exports = function () {
         }
         
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Email by Page ID: " + error.body || error)
       }
     }
 
@@ -191,7 +191,7 @@ module.exports = function () {
         }
         return arrBlocks;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Page Blocks: " + error.body || error)
       }
     }
 
@@ -210,7 +210,7 @@ module.exports = function () {
         }
         return arrBlocks;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting One Level Blocks: " + error.body || error)
       }
     }
 
@@ -225,7 +225,7 @@ module.exports = function () {
         }
         return arrBlocks;
        } catch (error) {
-          console.error(error.body)
+          console.error("Error in Getting All Level Children: " + error.body || error)
        }    
     }
 
@@ -319,7 +319,7 @@ module.exports = function () {
         var result = await appendPageBlocks(req.body.pageId, content);
         return result;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Adding Message Block: " + error.body || error)
       }
     }
 
@@ -351,7 +351,7 @@ module.exports = function () {
         }
         return arrCodes;
       } catch (error) {
-        console.error(error.body)
+        console.error("Error in Getting Clients Sold CRM: " + error.body || error)
       }
   }
 
@@ -400,7 +400,7 @@ module.exports = function () {
       }
       return arrPages;
     } catch (error) {
-      console.error(error.body)
+      console.error("Error in Getting Pages Filter: " + error.body || error)
     }
   }
 
@@ -433,7 +433,7 @@ module.exports = function () {
       }
       return userID;
     } catch (error) {
-      console.error(error.body)
+      console.error("Error in Getting User ID: " + error.body || error)
     }
   }
 
@@ -442,7 +442,7 @@ module.exports = function () {
       var user = await notion.users.retrieve({ user_id: id });
       return user;
     } catch (error) {
-      console.error(error.body)
+      console.error("Error in Getting User: " + error.body || error)
     }
   }
 

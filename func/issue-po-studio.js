@@ -114,12 +114,12 @@ async function checkAndIssuePO () {
                 await updatePage(newPage);
             }
             catch (error) {
-                console.error(error.body || error)
+                console.error("Error in issuing Studio PO: " + error.body || error)
             }
         }
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in issuing Studio PO: " + error.body || error)
     }
 }
 
@@ -146,12 +146,12 @@ async function checkAndDeletePO () {
                 }
             }
             catch (error) {
-                console.error(error.body || error)
+                console.error("Error in deleting Studio PO: " + error.body || error)
             }
         }
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in deleting Studio PO: " + error.body || error)
     }
 }
 
@@ -182,7 +182,7 @@ async function postPO(client, description, wc, rate, actor, clientCode, taskID) 
             return response.data.id;
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error in posting studio PO: " + error);
         return "";
     }
 }
@@ -202,7 +202,7 @@ async function deletePO(poID) {
             return response.data;
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error in api request to delete Studio PO: " + error);
         return "";
     }
 }

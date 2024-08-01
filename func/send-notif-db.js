@@ -137,7 +137,7 @@ async function checkChangesPageSendNotif () {
             await Promise.all(updatePromises).then((v) => { console.log('Pages updated with children blocks: ', v.length) });
         }
         catch (error) {
-            console.error(error.body || error)
+            console.error("Error in sending Notion DB notification: " + error.body || error)
         }
     }
     

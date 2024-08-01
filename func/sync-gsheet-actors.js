@@ -391,7 +391,7 @@ async function syncGSheetActors () {
         await syncGSheet(actorsStored);
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("Error in syncing GSheet actors: " + error.body || error)
     }
 }
 

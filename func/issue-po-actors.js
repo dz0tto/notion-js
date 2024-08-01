@@ -80,12 +80,12 @@ async function checkAndIssuePO () {
                 await updatePage(newPage);
             }
             catch (error) {
-                console.error(error.body || error)
+                console.error("Error in checkAndIssuePO actors: " + error.body || error)
             }
         }
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in checkAndIssuePO actors: " + error.body || error)
     }
 }
 
@@ -117,7 +117,7 @@ async function postPO(client, description, wc, rate, actor, clientCode, taskID) 
             return response.data.id;
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error in issuing PO: " + error);
         return "";
     }
 }

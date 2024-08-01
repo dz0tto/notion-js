@@ -68,7 +68,7 @@ async function checkChangesSendNotif () {
         } 
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("Error in sending session notification: " + error.body || error)
     }
 }
 

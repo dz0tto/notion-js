@@ -75,42 +75,45 @@ async function checkAndSyncSessions () {
             const renamed = page.properties["Ренейм"]?.rich_text[0]?.plain_text === "Renamed";
             return plannedStatuses.includes(statusName) && renamed;
         });
-        for (const page of notPlannedPages) {
-            try {
-                const ev = await pageToEvent(page);
-                    
-                calendar.events.insert({
-                    auth: jwtClient,
-                    calendarId: studiCalId,
-                    resource: ev,
-                    }, function(err, event) {
-                        if (err) {
-                            console.log('There was an error contacting the Calendar service: ' + err);
-                            return;
-                        }
-                        console.log('Event created: %s', event.data.htmlLink);
-                        page.properties["GCal"].rich_text = [
-                            {
-                                "type": "text",
-                                "text": {
-                                    "content": event.data.id,
-                                    "link": null
+
+        if (notPlannedPages && typeof notPlannedPages[Symbol.iterator] === 'function') {
+            for (const page of notPlannedPages) {
+                try {
+                    const ev = await pageToEvent(page);
+                        
+                    calendar.events.insert({
+                        auth: jwtClient,
+                        calendarId: studiCalId,
+                        resource: ev,
+                        }, function(err, event) {
+                            if (err) {
+                                console.log('There was an error contacting the Calendar service: ' + err);
+                                return;
+                            }
+                            console.log('Event created: %s', event.data.htmlLink);
+                            page.properties["GCal"].rich_text = [
+                                {
+                                    "type": "text",
+                                    "text": {
+                                        "content": event.data.id,
+                                        "link": null
+                                    }
+                                }
+                                ]
+                            const newPage = {
+                                page_id: page.id,
+                                properties: {
+                                    "GCal": page.properties["GCal"],
                                 }
                             }
-                            ]
-                        const newPage = {
-                            page_id: page.id,
-                            properties: {
-                                "GCal": page.properties["GCal"],
-                            }
-                        }
-                        updatePage(newPage);
-                });
-            }
-            catch (error) {
-                console.error(error.body || error)
-            }
-        };
+                            updatePage(newPage);
+                    });
+                }
+                catch (error) {
+                    console.error("Error in planning page in checkAndSyncSessions: " + error.body || error)
+                }
+            };
+        }
 
         const pPages = await getPagesFilter(plannedSessions, databaseId);
         const plannedPages = pPages?.filter(page => {
@@ -148,7 +151,7 @@ async function checkAndSyncSessions () {
                 }
             }
             catch (error) {
-                console.error(error.body || error)
+                console.error("Error in planned pages in checkAndSyncSessions: " + error.body || error)
             }
         }
 
@@ -156,7 +159,7 @@ async function checkAndSyncSessions () {
         
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("General error in checkAndSyncSessions: " + error.body || error)
     }
 }
 

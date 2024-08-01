@@ -320,7 +320,7 @@ async function syncGSheetSessions () {
         await syncGSheet();
     }
     catch (error) {
-        console.error(error.body || error)
+        console.error("Error in syncing GSheet sessions: " + error.body || error)
     }
 }
 
