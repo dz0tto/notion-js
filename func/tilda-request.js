@@ -10,14 +10,20 @@ const mmUrl = Nconf.get("MATTERMOST_URL");
 const mmToken = Nconf.get("MATTERMOST_TILDA_BOT");
 const mmBot = new MattermostBot(mmUrl, mmToken);
 
+const mmChannelTilda = Nconf.get("MATTERMOST_CHANNEL_TILDA");
+
 async function processTildaReq(req, res) {
+    const secret = req.headers['secret'];
+    if (!secret || secret !== Nconf.get("TILDA_SECRET")) {
+        res.status(401).send('Unauthorized: No secret in headers');
+        return;
+    }
     const data = req.body;
-    //stringify the data
-    const string = JSON.stringify(data);
-    const channelId = ''; // replace with your channel ID
+    //stringify the data as *key:* value
+    const string = Object.keys(data).map(key => `**${key}:** ${data[key]}`).join('\n');
 
     try {
-        await mmBot.sendMessageAsBot(channelId, string, null);
+        await mmBot.sendMessageAsBot(mmChannelTilda, string, null);
         res.sendStatus(200);
     } catch (error) {
         console.error(error);
@@ -25,4 +31,6 @@ async function processTildaReq(req, res) {
     }
 }
 
-module.exports = processTildaReq;
+module.exports = {
+    processTildaReq
+};
