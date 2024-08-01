@@ -19,14 +19,24 @@ async function processTildaReq(req, res) {
         return;
     }
     const data = req.body;
+    //filter out the data we don't need = tranid, formid, Checkbox
+    delete data.tranid;
+    delete data.formid;
+    delete data.Checkbox;
     //stringify the data as *key:* value
-    const string = Object.keys(data).map(key => `**${key}:** ${data[key]}`).join('\n');
+    const string = Object.keys(data).map(key => {
+           if (key !== 'Textarea') return `**${key}:** \`${data[key]}\`` 
+           else {
+                const message = data[key] ? data[key].split('\n').map((line) => `> ${line}`).join('\n') : '';
+                return `**${key}:**\n${message}`
+           } 
+        }).join('\n');
 
     try {
         await mmBot.sendMessageAsBot(mmChannelTilda, string, null);
         res.sendStatus(200);
     } catch (error) {
-        console.error(error);
+        console.error("Error in processing Tilda webhook: " + error);
         res.sendStatus(500);
     }
 }
