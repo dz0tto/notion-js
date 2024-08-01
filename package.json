@@ -1,12 +1,13 @@
 {
   "name": "database-update-watch",
   "version": "0.0.1",
-  "description": "Whatch an update is made in Notion.",
-  "main": "index.js",
+  "description": "Watch an update is made in Notion.",
+  "main": "app.js",
   "engines": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ts-run": "node --loader ts-node/esm index.ts"
+    "ts-run": "node --loader ts-node/esm index.ts",
+    "start": "node app.js"
   },
   "dependencies": {
     "@mattermost/client": "^9.9.0",
