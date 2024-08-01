@@ -34,6 +34,11 @@ async function checkAndIssuePO () {
             const statusName = page.properties["Статус сессии"]?.rollup?.array[0]?.status?.name;
             return !notReadyStatuses.includes(statusName);
         });
+        if (!filteredPages) return;
+        //check filteredPages if iterable
+        if (typeof filteredPages[Symbol.iterator] !== 'function') {
+            return;
+        }
         for (const page of filteredPages) {
             try {
                 const jobType = page.properties["Тип работы"].select.name;
