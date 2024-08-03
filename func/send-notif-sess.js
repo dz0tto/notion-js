@@ -19,7 +19,7 @@ Nconf
 // const slackToken = Nconf.get("SLACK_NOTIF_SESS_TOKEN"); // Replace with your Slack app's token
 // const slackNotifier = new SlackNotifier(slackToken);
 
-const MattermostNotifier = require('../messengers/mm');
+const { MattermostNotifier } = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
 const mmUsername = Nconf.get("MATTERMOST_USERNAME");
 const mmPassword = Nconf.get("MATTERMOST_PASSWORD");

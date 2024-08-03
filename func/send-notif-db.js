@@ -12,7 +12,7 @@ Nconf
 .file(Path.join(Path.dirname(require.main.filename), 'credentials.json'));
 
 
-const MattermostNotifier = require('../messengers/mm');
+const { MattermostNotifier } = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
 const mmUsername = Nconf.get("MATTERMOST_NOTION_USERNAME");
 const mmPassword = Nconf.get("MATTERMOST_NOTION_PASSWORD");

@@ -5,7 +5,7 @@ Nconf
 .file(Path.join(Path.dirname(require.main.filename), 'credentials.json'));
 
 
-const MattermostBot = require('../messengers/mm');
+const { MattermostBot } = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
 const mmToken = Nconf.get("MATTERMOST_TILDA_BOT");
 const mmBot = new MattermostBot(mmUrl, mmToken);

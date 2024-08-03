@@ -92,5 +92,4 @@ class MattermostBot {
   }
 }
 
-module.exports = MattermostNotifier;
-module.exports = MattermostBot;
+module.exports = { MattermostNotifier, MattermostBot }; 

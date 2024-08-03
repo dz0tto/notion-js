@@ -12,7 +12,7 @@ const token = Nconf.get("TG_BRIDGE_BOT_TOKEN");
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 
-const MattermostNotifier = require('../messengers/mm');
+const { MattermostNotifier } = require('../messengers/mm');
 const mmUrl = Nconf.get("MATTERMOST_URL");
 const mmUsername = Nconf.get("MATTERMOST_USERNAME");
 const mmPassword = Nconf.get("MATTERMOST_PASSWORD");
