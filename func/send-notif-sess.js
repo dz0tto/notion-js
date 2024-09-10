@@ -29,7 +29,7 @@ const notionTimezone = 'Europe/Moscow';
 
 const sessionStored = [];
 
-const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
+const databaseId = "527a3d104ebc4c72a524a94341f32339"
 
 async function checkChangesSendNotif () {
     try {
