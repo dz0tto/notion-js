@@ -4,7 +4,7 @@ const databaseId = "527a3d104ebc4c72a524a94341f32339"
 
 const financeDBid = "23e2ec64a13c40fbaa84b51d8a4e06aa"
 
-const workersDBid = "ad5867861406411ba95545c8d551db1e"
+const workersDBid = "8f5497a2dbf94ab0acbdbb5b16268a97"
 
 const notReadyStatuses = ["Необходимо"];
 

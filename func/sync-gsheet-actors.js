@@ -24,7 +24,7 @@ const notionTimezone = 'Europe/Moscow';
 
 const actorsStored = [];
 
-const databaseId = "e561712b0b67459f95f302d60e519094"
+const databaseId = "71dc1b71bc5a471c9bd7e4936fa18833"
 
 const spreadsheetId = '1pNmhuEcx5nykMOEqMnyiMOcRBJqrUniDUlbOuo9TZCo';
 
