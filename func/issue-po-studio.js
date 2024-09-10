@@ -1,8 +1,8 @@
 const { getPagesFilter, updatePage, getPageTitleByIDnName, getPageByID, deletePageByID } = require("../notion/database/database.datalayer")();
 
-const databaseId = "26754db5110b4776b33613341851d368"
+const databaseId = "23e2ec64a13c40fbaa84b51d8a4e06aa"
 
-const workersDBid = "f7ccc2961ec64482aca9a8509d50b3c8"
+const workersDBid = "ad5867861406411ba95545c8d551db1e"
 
 // filter with empty property PO and status not "Необходимо", "Загружено", "Назначено"
 const notReadyStatuses = ["Необходимо", "Назначено"];

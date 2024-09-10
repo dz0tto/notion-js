@@ -1,10 +1,10 @@
 const { getPagesFilter, updatePage, createPage } = require("../notion/database/database.datalayer")();
 
-const databaseId = "a12d2dbbb6ce4fb09a76043b176ee1d2"
+const databaseId = "527a3d104ebc4c72a524a94341f32339"
 
-const financeDBid = "26754db5110b4776b33613341851d368"
+const financeDBid = "23e2ec64a13c40fbaa84b51d8a4e06aa"
 
-const workersDBid = "f7ccc2961ec64482aca9a8509d50b3c8"
+const workersDBid = "ad5867861406411ba95545c8d551db1e"
 
 const notReadyStatuses = ["Необходимо"];
 
