@@ -23,7 +23,7 @@ const mattermostNotifier = new MattermostNotifier(mmUrl, mmUsername, mmPassword)
 const pagesStored = new Map();
 
 const wahtchedList = [
-    { dbID: "889eacd877d0479489071bfb2daef99a", channel: "crm-notifications" }
+    { dbID: "64157f1636ee435f8ef64b4aa8293732", channel: "crm-notifications" }
 ]
 
 class RateLimiter {
