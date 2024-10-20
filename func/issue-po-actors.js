@@ -61,6 +61,7 @@ async function checkAndIssuePO () {
                 }
                 
                 const subj = `[${llid}] ${page.properties["Задача"].title[0].plain_text}`;
+                if (!subj) continue;
                 const id = await postPO(client, subj, hours, price, actor, clientCode, llid);
                 page.properties["PO"].rich_text = [
                     {
