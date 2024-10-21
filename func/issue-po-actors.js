@@ -111,6 +111,10 @@ async function postPO(client, description, wc, rate, actor, clientCode, taskID) 
         opt.actor = actor;
     }
     try {
+        if (!description || description === "") {
+            console.error("Error in posting studio PO: " + "error in description");
+            return "";
+        }
         const response = await axios.post(url, opt);
         if (response.data.error) {
             return "";
