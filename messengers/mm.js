@@ -71,13 +71,22 @@ class MattermostBot {
     this.mattermostClient = new Client4();
     this.mattermostClient.setUrl(url);
     this.mattermostClient.setToken(botToken);
+    this.botUserId = null;
+  }
+
+  async initializeBotUser() {
+    try {
+      const botUser = await this.mattermostClient.getMe();
+      this.botUserId = botUser.id;
+    } catch (error) {
+      console.error('Error initializing bot user:', error);
+    }
   }
 
   async sendMessageAsBot(channelId, message, attachments) {
     try {
       let post = {
-        message: message,
-        props: { from_webhook: 'true' }
+        message: message
       }
       if (channelId !== '') {
         post.channel_id = channelId
@@ -88,6 +97,37 @@ class MattermostBot {
       await this.mattermostClient.createPost(post);
     } catch (error) {
       console.error('Error sending message as bot: ', error);
+    }
+  }
+
+  async findUserByEmail(email) {
+    try {
+      const user = await this.mattermostClient.getUserByEmail(email);
+      return user.id;
+    } catch (error) {
+      console.error('Error finding user by email:', error);
+    }
+  }
+  
+  async sendMessageToUser(email, message) {
+    if (email === '') return;
+    try {
+      // check if email contains @levshagames.ru and replace by @levsha.eu
+      if (email.includes('@levshagames.ru')) {
+        email = email.replace('@levshagames.ru', '@levsha.eu');
+      }
+      const userId = await this.findUserByEmail(email);
+      if (userId) {
+        if (!this.botUserId) {
+          await this.initializeBotUser();
+        }
+        const directChannel = await this.mattermostClient.createDirectChannel([this.botUserId, userId]);
+        await this.sendMessageAsBot(directChannel.id, message);
+      } else {
+        console.error('User not found');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   }
 }

@@ -22,6 +22,8 @@ const tgBot = require("./messengers/telegram");
 
 const { processTildaReq } = require("./func/tilda-request");
 
+const { processVendorReq } = require("./func/vendor-bot");
+
 tgBot.startBot();
 
 executeCheckAndRenameSessions();
@@ -52,6 +54,11 @@ app.use(bodyParser.json());
 app.post('/webhook/tilda', (req, res) => {
     // Parse the `payload` body parameter into a JSON object
     processTildaReq(req, res);
+});
+
+app.post('/webhook/vendorbot', (req, res) => {
+    // Parse the `payload` body parameter into a JSON object
+    processVendorReq(req, res);
 });
 
 const port = process.env.PORT || 3000;
