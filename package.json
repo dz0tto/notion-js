@@ -22,7 +22,8 @@
     "moment-timezone": "^0.5.43",
     "nconf": "^0.12.1",
     "node-telegram-bot-api": "^0.66.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ws": "^8.18.0"
   },
   "author": "dz0tto"
 }

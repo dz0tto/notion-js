@@ -18,6 +18,9 @@ const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 
 const { executeCheckChangesPageSendNotif } = require("./func/send-notif-db");
 
+//const { executeSyncGSheetPortalSessions } = require("./func/sync-gsheet-sessions-portal");
+
+const { startVendorAvailabilityBot } = require("./func/vend-availability-bot");
 const tgBot = require("./messengers/telegram");
 
 const { processTildaReq } = require("./func/tilda-request");
@@ -43,6 +46,10 @@ executeDeleteStudioPOs();
 executeIssueStudioPOs();
 
 executeCheckChangesPageSendNotif();
+
+//executeSyncGSheetPortalSessions();
+
+startVendorAvailabilityBot();
 
 const express = require('express');
 const bodyParser = require('body-parser');

@@ -83,7 +83,7 @@ class MattermostBot {
     }
   }
 
-  async sendMessageAsBot(channelId, message, attachments) {
+  async sendMessageAsBot(channelId, message, attachments, respondToRootId) {
     try {
       let post = {
         message: message
@@ -93,6 +93,9 @@ class MattermostBot {
       }
       if (attachments) {
         post.attachments = attachments;
+      }
+      if (respondToRootId) {
+        post.root_id = respondToRootId;
       }
       await this.mattermostClient.createPost(post);
     } catch (error) {
@@ -108,6 +111,38 @@ class MattermostBot {
       console.error('Error finding user by email:', error);
     }
   }
+
+  async findUserById(userId) {
+    try {
+      const user = await this.mattermostClient.getUser(userId);
+      return user;
+    } catch (error) {
+      console.error('Error finding user by id:', error);
+      return null;
+    }
+  }
+
+  async getUserStatus(userId) {
+    try {
+      const status = await this.mattermostClient.getStatus(userId);
+      return status;
+    } catch (error) {
+      console.error('Error getting user status:', error);
+      return null;
+    }
+  }
+
+  async getUsersInTeam(teamName) {
+    try {
+        const team = await this.mattermostClient.getTeamByName(teamName);
+        // get all users in the team with pages
+        const users = await this.mattermostClient.getTeamMembers(team.id, 0, 400);
+        return users;
+    } catch (error) {
+        console.error('Error fetching users in team:', error);
+        return [];
+    }
+  } 
   
   async sendMessageToUser(email, message) {
     if (email === '') return;
