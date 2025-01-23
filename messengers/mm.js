@@ -97,9 +97,11 @@ class MattermostBot {
       if (respondToRootId) {
         post.root_id = respondToRootId;
       }
-      await this.mattermostClient.createPost(post);
+      const msg = await this.mattermostClient.createPost(post);
+      return msg;
     } catch (error) {
       console.error('Error sending message as bot: ', error);
+      return null;
     }
   }
 
@@ -136,7 +138,7 @@ class MattermostBot {
     try {
         const team = await this.mattermostClient.getTeamByName(teamName);
         // get all users in the team with pages
-        const users = await this.mattermostClient.getTeamMembers(team.id, 0, 400);
+        const users = await this.mattermostClient.getProfilesInTeam(team.id, 0, 400);
         return users;
     } catch (error) {
         console.error('Error fetching users in team:', error);
