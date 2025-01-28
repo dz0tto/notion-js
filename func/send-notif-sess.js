@@ -73,11 +73,11 @@ async function checkChangesSendNotif () {
 }
 
 async function notify(page, oldStatus, newStatus) {
-    const batchID = page.properties["🚗 Батч"].relation[0].id;
-    const director = page.properties["Режиссёр"]?.people[0]?.person?.email || "";
-    const postProd = page.properties["Постпрод"]?.people[0]?.person?.email || "";
-    const engineer = page.properties["Инженер"]?.people[0]?.person?.email || "";
-    const soundqa = page.properties["Отслушка"]?.people[0]?.person?.email || "";
+    const batchID = page?.properties["🚗 Батч"]?.relation[0]?.id || "";
+    const director = page?.properties["Режиссёр"]?.people[0]?.person?.email || "";
+    const postProd = page?.properties["Постпрод"]?.people[0]?.person?.email || "";
+    const engineer = page?.properties["Инженер"]?.people[0]?.person?.email || "";
+    const soundqa = page?.properties["Отслушка"]?.people[0]?.person?.email || "";
     const pms = await getEmailByPageID(batchID, "Менеджер батча");
     const people = { 
         "Режиссёр" : director, 
@@ -104,6 +104,75 @@ async function notify(page, oldStatus, newStatus) {
 module.exports.sendNotificationSession = function(page, oldStatus, newStatus) {
     notify(page, oldStatus, newStatus)
 };
+
+module.exports.notifyPortalSession = async function(session, oldStatus, newStatus) {
+    const director = session.director;
+    const postProd = session.editor;
+    const engineer = session.engineer;
+    const pm = session.batch?.pm || session.pm || session?.quote?.levshaPm || "";
+    const people = { 
+        "Режиссёр" : director, 
+        "Постпрод" : postProd, 
+        "Инженер" : engineer,
+        "Менеджер батча" : pm,
+        "Админ" : "dzotto@levsha.eu"
+    };
+    const admin = "dzotto@levsha.eu";
+    const emails = [director, postProd, engineer, admin, pm].filter(email => email !== "")
+    // send notification
+    for (const email of emails) {
+        const message = await formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people);
+        if (message.mattermostMessage && email !== "" && email !== undefined) {
+            mattermostNotifier.sendMessageToUser(email, message.mattermostMessage);
+        }
+    }
+}
+
+async function formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people) {
+    // Function to format date and time
+    const formatDateTime = (momentObj, format) => {
+        momentObj.locale('ru');
+        return momentObj.tz(notionTimezone).format(format);
+    };
+    
+    // Extracting and formatting date and time
+    const startDate = moment(session.sessionDate);
+    const durationHours = session.studioHours;
+    const endDate = startDate.clone().add(durationHours, 'hours');
+    
+    const formattedStart = formatDateTime(startDate, 'DD MMMM, HH:mm');
+    const formattedEnd = formatDateTime(endDate, 'HH:mm');
+  
+    // Constructing message content
+    const batchID = session.batchID || session.quote?.id;
+    //const link = `https://scaevola.levsha.eu/sound/batches/${batchID}`;
+    const link = `https://portal-vue-dev.azurewebsites.net//sound/batches/${batchID}`
+    const batch = session['batch']?.batch?.find(v => v.id === 'batchName')?.value || '';
+    const actor = session.actorName
+    const studio = session.studioName
+    //find email in people
+    const role = Object.keys(people).find(key => people[key] === email || (Array.isArray(people[key]) && people[key].includes(email)));
+
+    // Format the Mattermost message
+    let mattermostMessage = '';
+    if (oldStatus === newStatus) { mattermostMessage += `Внесены изменения в сессию.\n\n` }
+    else { mattermostMessage += `Изменение статуса (${oldStatus} -> ${newStatus}) сессии.\n\n` }
+
+    mattermostMessage += `**Батч**: ${batch}\n` +
+        `**Актёр**: ${actor}\n` +
+        `**Студия**: ${studio}\n` +
+        `**Время**: ${formattedStart} - ${formattedEnd} MSK\n\n`
+    if (oldStatus !== newStatus) {
+        mattermostMessage += `**Сменился статус:**\n${oldStatus} -> ${newStatus}\n` 
+    } else {
+        mattermostMessage += `**Cтатус:**\n${newStatus}\n` 
+    }      
+    mattermostMessage += `**Ваша роль:**\n${role}\n`;
+
+    mattermostMessage += `[Посмотреть на портале](${link})`;
+    
+    return { mattermostMessage };
+}
 
 const propWatchCal = ["Актёр", "Студия", "Начало", "Часы", "Zoom", "ID"]
 

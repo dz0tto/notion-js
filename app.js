@@ -18,14 +18,16 @@ const { executeSyncGSheetSessions } = require("./func/sync-gsheet-sessions");
 
 const { executeCheckChangesPageSendNotif } = require("./func/send-notif-db");
 
-//const { executeSyncGSheetPortalSessions } = require("./func/sync-gsheet-sessions-portal");
+const { executeSyncGSheetPortalSessions } = require("./func/sync-gsheet-sessions-portal");
 
- const { startVendorAvailabilityBot } = require("./func/vend-availability-bot");
+const { startVendorAvailabilityBot } = require("./func/vend-availability-bot");
 const tgBot = require("./messengers/telegram");
 
 const { processTildaReq } = require("./func/tilda-request");
 
 const { processVendorReq } = require("./func/vendor-bot");
+
+const { processVOBotReq } = require("./func/vo-notif-bot");
 
 tgBot.startBot();
 
@@ -47,7 +49,7 @@ executeIssueStudioPOs();
 
 executeCheckChangesPageSendNotif();
 
-//executeSyncGSheetPortalSessions();
+executeSyncGSheetPortalSessions();
 
 startVendorAvailabilityBot();
 
@@ -66,6 +68,10 @@ app.post('/webhook/tilda', (req, res) => {
 app.post('/webhook/vendorbot', (req, res) => {
     // Parse the `payload` body parameter into a JSON object
     processVendorReq(req, res);
+});
+
+app.post('/webhook/vobot', (req, res) => {
+    processVOBotReq(req, res);
 });
 
 const port = process.env.PORT || 3000;
