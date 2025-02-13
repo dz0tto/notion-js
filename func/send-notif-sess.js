@@ -118,7 +118,7 @@ module.exports.notifyPortalSession = async function(session, oldStatus, newStatu
         "Админ" : "dzotto@levsha.eu"
     };
     const admin = "dzotto@levsha.eu";
-    const emails = [director, postProd, engineer, admin, pm].filter(email => email !== "")
+    const emails = [director, postProd, engineer, admin, pm].filter(email => email !== "" && email !== null)
     // send notification
     for (const email of emails) {
         const message = await formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people);
@@ -137,17 +137,17 @@ async function formatPortalSessionNotification(session, oldStatus, newStatus, no
     
     // Extracting and formatting date and time
     const startDate = moment(session.sessionDate);
-    const durationHours = session.studioHours;
+    const durationHours = session.type === 'Техническая' ? session.editorHours : session.studioHours;
     const endDate = startDate.clone().add(durationHours, 'hours');
     
     const formattedStart = formatDateTime(startDate, 'DD MMMM, HH:mm');
     const formattedEnd = formatDateTime(endDate, 'HH:mm');
   
     // Constructing message content
-    const batchID = session.batchID || session.quote?.id;
+    const batchID = session.batch?.taskId || session.quote?.id || session.batchID || session.batchId;
     //const link = `https://scaevola.levsha.eu/sound/batches/${batchID}`;
-    const link = `https://portal-vue-dev.azurewebsites.net//sound/batches/${batchID}`
-    const batch = session['batch']?.batch?.find(v => v.id === 'batchName')?.value || '';
+    const link = `https://portal-vue-dev.azurewebsites.net/sound/batches/${batchID}`
+    const batch = session.batch?.batchName || session['batch']?.batch?.find(v => v.id === 'batchName')?.value || '';
     const actor = session.actorName
     const studio = session.studioName
     //find email in people
@@ -158,16 +158,17 @@ async function formatPortalSessionNotification(session, oldStatus, newStatus, no
     if (oldStatus === newStatus) { mattermostMessage += `Внесены изменения в сессию.\n\n` }
     else { mattermostMessage += `Изменение статуса (${oldStatus} -> ${newStatus}) сессии.\n\n` }
 
-    mattermostMessage += `**Батч**: ${batch}\n` +
-        `**Актёр**: ${actor}\n` +
-        `**Студия**: ${studio}\n` +
-        `**Время**: ${formattedStart} - ${formattedEnd} MSK\n\n`
+    mattermostMessage += `**Батч**: ${batch}\n`
+    if (actor) { mattermostMessage +=    `**Актёр**: ${actor}\n` }
+    if (studio) { mattermostMessage +=    `**Студия**: ${studio}\n` }
+    if (session.type === 'Техническая') { mattermostMessage +=    `**Тип сессии**: ${session.type}\n` }
+    mattermostMessage +=     `**Время**: ${formattedStart} - ${formattedEnd} MSK\n\n`
     if (oldStatus !== newStatus) {
-        mattermostMessage += `**Сменился статус:**\n${oldStatus} -> ${newStatus}\n` 
+        mattermostMessage += `**Сменился статус:** ${oldStatus} -> ${newStatus}\n` 
     } else {
-        mattermostMessage += `**Cтатус:**\n${newStatus}\n` 
+        mattermostMessage += `**Cтатус:** ${newStatus}\n` 
     }      
-    mattermostMessage += `**Ваша роль:**\n${role}\n`;
+    mattermostMessage += `**Ваша роль:** ${role}\n`;
 
     mattermostMessage += `[Посмотреть на портале](${link})`;
     
