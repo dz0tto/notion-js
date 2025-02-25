@@ -31,10 +31,10 @@ const timezones = {
     'EVN': 'Asia/Yerevan',
     'MSK': 'Europe/Moscow',
     'TBS': 'Asia/Tbilisi',
-    'Freelance': 'Europe/Moscow',
+    'Freelance': 'Europe/Ljubljana',
     'msk-studio@levsha.eu' : 'Europe/Moscow',   
     'evn-studio@levsha.eu' : 'Asia/Yerevan',
-    'freelance-studio@levsha.eu' : 'Europe/Moscow'
+    'freelance-studio@levsha.eu' : 'Europe/Ljubljana'
 }
 
 const studioNames = {
@@ -216,7 +216,7 @@ const getSessionTitle = (session) => {
     const dateString = sessionMoment.format('DD MMMM')
     const timeString = sessionMoment.format('HH:mm')
     const timeEnd = sessionMoment.add(length, 'hours').format('HH:mm');
-    return `[${studio}] ${batchName} - [${batchMic || 'No mic'}|${batchBit || 'No bit'}, ${batchHz || 'No Hz'}|${channel || 'No channels'}] - ${actor || 'техническая'} - ${dateString} ${timeString}-${timeEnd} (MSK)`
+    return `[${studio}] ${batchName} - [${batchMic || 'No mic'}|${batchBit || 'No bit'}, ${batchHz || 'No Hz'}|${channel || 'No channels'}] - ${actor || 'техническая'} - ${dateString} ${timeString}-${timeEnd} (${session['студия']})`
 }
 
 const createSession = async (session) => {
@@ -242,11 +242,11 @@ const createSession = async (session) => {
     });
     const sessionRes = await response.json();
     let sessionInfo = sessionRes?.data?.recordset[0];
-    const sessionMoment = moment.tz(session['дата'] + ' ' + session['начало сессии'], 'DD.MM.YYYY HH:mm', timezones[studioNames[session.studio]])
+    const sessionMoment = moment.tz(session['дата'] + ' ' + session['начало сессии'], 'DD.MM.YYYY HH:mm', timezones[session['студия']])
     //cast to camelCase
     sessionInfo = _.mapKeys(sessionInfo, (v, k) => _.camelCase(k));
     sessionInfo.title = getSessionTitle(session);
-    sessionInfo.sessionDate = sessionMoment.format('YYYY-MM-DD HH:mm')
+    sessionInfo.sessionDate = stringUserTZToMSKMoment(sessionMoment).format('YYYY-MM-DD HH:mm')
     sessionInfo.prevStatus = sessionInfo.sessionStatus
     sessionInfo.sessionStatus = 'Назначено'
     sessionInfo.actor = session['actorID']
@@ -265,7 +265,18 @@ const createSession = async (session) => {
     sessionInfo.studioName = session['студия']
     sessionInfo.batchID = session['batchID']
     return sessionInfo;
-}   
+}
+const stringUserTZToMSKMoment = (value, studio) => {   
+    if (!value) { 
+        value = '0000-00-00 00:00'; 
+    } else if (moment.isMoment(value)) {
+        // If value is already a Moment object, convert it to MSK
+        return value.tz('Europe/Moscow');
+    }
+    
+    const userTime = moment.tz(value, timezones[studio]);
+    return userTime.tz('Europe/Moscow');
+} 
 
 
 const updateSession = async (session) => {
