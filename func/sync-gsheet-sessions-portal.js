@@ -24,7 +24,8 @@ const serviceAccountKeyJson = JSON.parse(Base64.decode(serviceAccountKeyBase64))
 const spreadsheetId = '1-D8efQECrlqbd6qzPGjpp7ZUODCsx61ck_9fRgCCWjE';
 
 //const levshaApiUrl = 'http://localhost:8810';
-const levshaApiUrl = 'https://api.levsha.eu';
+const levshaApiUrl = 'https://levsha-api-ne-dev.azurewebsites.net';
+//const levshaApiUrl = 'https://api.levsha.eu';
 
 const timezones = {
     'EVN': 'Asia/Yerevan',
@@ -122,12 +123,12 @@ async function syncGSheet() {
     const sessionsGSheetNonEmpty = sessionsGSheet.filter(sheet => sheet.values.length > 0);
 
     const sessionsToAddPromises = sessionsGSheetNonEmpty.map(async (sheet) => {
-        const result = sheet.values.filter(row => row['notion'] === 'готово' && row['ссылка'] === '');
+        const result = sheet.values.filter(row => row['notion'] === 'готово' && row['ссылка'] !== 'added');
         //add batchID, actorID, directorID, postprodID, lqaID for each row
         for (const row of result) {
             const batchID = row['проект'].split('/').pop();
             const batch = await getBatchInfo(batchID);
-            if (batch.batchStatus === 'Сметирование' || batch.batchStatus === '') {
+            if (batch.batch?.find(v => v.id === 'batchStatus')?.value === 'Сметирование' || batch.batch?.find(v => v.id === 'batchStatus')?.value === '') {
                 row['status'] = 'Сметирование'
             }
             row['batchID'] = batchID;
@@ -139,23 +140,7 @@ async function syncGSheet() {
     });
     
     const sessionsToAdd = await Promise.all(sessionsToAddPromises);
-    
-    const sessionsToUpdatePromises = sessionsGSheetNonEmpty.map(async (sheet) => {
-        const result =  sheet.values.filter(row => row['notion'] === 'готово' && row['ссылка'] !== '');
-        //add batchID, actorID, directorID, postprodID, lqaID for each row
-        for (const row of result) {
-            const batchID = row['проект'].split('/').pop();
-            const batch = await getBatchInfo(batchID);
-            row['batchID'] = batchID;
-            row['batch'] = batch;
-            row['actorID'] = actorsGSheetObj.find(actor => actor.Name === row['актер'])?.id || '';
-            row['actorFull'] = actorsGSheetObj.find(actor => actor.Name === row['актер'])
-        }
-        return {sheetName: sheet.name, data: result};
-    });
-
-    const sessionsToUpdate = await Promise.all(sessionsToUpdatePromises);
-    
+   
     if (sessionsToAdd.length > 0) {
         // Add actors to gsheet 
         for (const sheetSession of sessionsToAdd) {
@@ -169,18 +154,6 @@ async function syncGSheet() {
                     notifyPortalSession(newPage, "Создано в GSheet", "Назначено");
                     await updateRowGSheet(sheets, sheetName, session, newPage);
                 }
-            }
-        }
-    }
-
-    if (sessionsToUpdate.length > 0) {
-        for (const sheetSession of sessionsToUpdate) {
-            // create actor in notion
-            const sheetName = sheetSession.sheetName;
-            for (const session of sheetSession.data) {
-                const updatedPage = await updateSession(session);
-                notifyPortalSession(updatedPage, "Внесены изменения", "Назначено");
-                await updateRowGSheet(sheets, sheetName, session, updatedPage);
             }
         }
     }
