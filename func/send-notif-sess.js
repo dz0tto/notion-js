@@ -132,7 +132,7 @@ async function formatPortalSessionNotification(session, oldStatus, newStatus, no
     // Function to format date and time
     const formatDateTime = (momentObj, format) => {
         momentObj.locale('ru');
-        return momentObj.tz(notionTimezone).format(format);
+        return momentObj.format(format);
     };
     
     // Extracting and formatting date and time
