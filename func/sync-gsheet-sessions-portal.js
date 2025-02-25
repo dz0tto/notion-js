@@ -127,6 +127,9 @@ async function syncGSheet() {
         for (const row of result) {
             const batchID = row['проект'].split('/').pop();
             const batch = await getBatchInfo(batchID);
+            if (batch.batchStatus === 'Сметирование' || batch.batchStatus === '') {
+                row['status'] = 'Сметирование'
+            }
             row['batchID'] = batchID;
             row['batch'] = batch;
             row['actorID'] = actorsGSheetObj.find(actor => actor.Name === row['актер'])?.id || '';
@@ -159,9 +162,13 @@ async function syncGSheet() {
             // create actor in notion
             const sheetName = sheetSession.sheetName;
             for (const session of sheetSession.data) {
-                const newPage = await createSession(session);
-                notifyPortalSession(newPage, "Создано в GSheet", "Назначено");
-                await updateRowGSheet(sheets, sheetName, session, newPage);
+                if (session.status === 'Сметирование') {
+                    await updateRowGSheet(sheets, sheetName, session, { reason: 'Смените статус батча' });
+                } else {
+                    const newPage = await createSession(session);
+                    notifyPortalSession(newPage, "Создано в GSheet", "Назначено");
+                    await updateRowGSheet(sheets, sheetName, session, newPage);
+                }
             }
         }
     }
@@ -368,7 +375,7 @@ async function updateRowGSheet(sheets, sheetName, session, newSession) {
             range: `${sheetName}!L${rowIndex + 2}:M${rowIndex + 2}`,
             valueInputOption: 'USER_ENTERED',
             resource: {
-                values: [['внесено', newSession.url ? newSession.url : 'added']],
+                values: [[newSession.reason ? 'ошибка' : 'внесено', newSession.reason ? newSession.reason : 'added']],
             },
         });
     } else {
