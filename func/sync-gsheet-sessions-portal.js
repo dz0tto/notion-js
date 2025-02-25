@@ -151,7 +151,7 @@ async function syncGSheet() {
                     await updateRowGSheet(sheets, sheetName, session, { reason: 'Смените статус батча' });
                 } else {
                     const newPage = await createSession(session);
-                    notifyPortalSession(newPage, "Создано в GSheet", "Назначено");
+                    // notifyPortalSession(newPage, "Создано в GSheet", "Назначено");
                     await updateRowGSheet(sheets, sheetName, session, newPage);
                 }
             }
