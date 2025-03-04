@@ -7,8 +7,8 @@ Nconf
 
 const { notifyPortalSession } = require("./send-notif-sess");
 
-async function processVOBotReq(req, res) {
-    try {
+async function processVOBotReqDev(req, res) {
+    try {   
         const { secret, session, prevStatus, currentStatus } = req.body;
 
         if (!secret || secret !== Nconf.get("VO_BOT_SECRET")) {
@@ -17,8 +17,8 @@ async function processVOBotReq(req, res) {
         }
 
         try {
-            const linkProd = `https://scaevola.levsha.eu/sound/batches/`;
-            await notifyPortalSession(session, prevStatus, currentStatus, linkProd)
+            const linkDev = `https://portal-vue-dev.azurewebsites.net/sound/batches/`
+            await notifyPortalSession(session, prevStatus, currentStatus, linkDev)
             res.sendStatus(200);
         } catch (error) {
             console.error("Error in sending VO message: " + error);
@@ -32,5 +32,5 @@ async function processVOBotReq(req, res) {
 }
 
 module.exports = {
-    processVOBotReq
+    processVOBotReqDev
 };

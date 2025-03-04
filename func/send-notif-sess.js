@@ -105,7 +105,7 @@ module.exports.sendNotificationSession = function(page, oldStatus, newStatus) {
     notify(page, oldStatus, newStatus)
 };
 
-module.exports.notifyPortalSession = async function(session, oldStatus, newStatus) {
+module.exports.notifyPortalSession = async function(session, oldStatus, newStatus, link) {
     const director = session.director;
     const postProd = session.editor;
     const engineer = session.engineer;
@@ -121,14 +121,14 @@ module.exports.notifyPortalSession = async function(session, oldStatus, newStatu
     const emails = [director, postProd, engineer, admin, pm].filter(email => email !== "" && email !== null)
     // send notification
     for (const email of emails) {
-        const message = await formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people);
+        const message = await formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people, link);
         if (message.mattermostMessage && email !== "" && email !== undefined) {
             mattermostNotifier.sendMessageToUser(email, message.mattermostMessage);
         }
     }
 }
 
-async function formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people) {
+async function formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people, link) {
     // Function to format date and time
     const formatDateTime = (momentObj, format) => {
         momentObj.locale('ru');
@@ -146,7 +146,7 @@ async function formatPortalSessionNotification(session, oldStatus, newStatus, no
     // Constructing message content
     const batchID = session.batch?.taskId || session.quote?.id || session.batchID || session.batchId;
     //const link = `https://scaevola.levsha.eu/sound/batches/${batchID}`;
-    const link = `https://portal-vue-dev.azurewebsites.net/sound/batches/${batchID}`
+    link = `${link}${batchID}`
     const batch = session.batch?.batchName || session['batch']?.batch?.find(v => v.id === 'batchName')?.value || '';
     const actor = session.actorName
     const studio = session.studioName

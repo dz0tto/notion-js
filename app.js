@@ -20,6 +20,8 @@ const { executeCheckChangesPageSendNotif } = require("./func/send-notif-db");
 
 const { executeSyncGSheetPortalSessions } = require("./func/sync-gsheet-sessions-portal");
 
+const { executeSyncGSheetPortalSessionsDev } = require("./func/sync-gsheet-sessions-portal-dev");
+
 const { startVendorAvailabilityBot } = require("./func/vend-availability-bot");
 const tgBot = require("./messengers/telegram");
 
@@ -29,6 +31,7 @@ const { processVendorReq } = require("./func/vendor-bot");
 
 const { processVOBotReq } = require("./func/vo-notif-bot");
 
+const { processVOBotReqDev } = require("./func/vo-notif-bot-dev");
 tgBot.startBot();
 
 executeCheckAndRenameSessions();
@@ -51,6 +54,8 @@ executeCheckChangesPageSendNotif();
 
 executeSyncGSheetPortalSessions();
 
+executeSyncGSheetPortalSessionsDev();
+
 startVendorAvailabilityBot();
 
 const express = require('express');
@@ -70,8 +75,12 @@ app.post('/webhook/vendorbot', (req, res) => {
     processVendorReq(req, res);
 });
 
-app.post('/webhook/vobot', (req, res) => {
+app.post('/webhook/vobot-prod', (req, res) => {
     processVOBotReq(req, res);
+});
+
+app.post('/webhook/vobot', (req, res) => {
+    processVOBotReqDev(req, res);
 });
 
 const port = process.env.PORT || 3000;
