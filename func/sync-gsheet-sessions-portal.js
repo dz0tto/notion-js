@@ -21,10 +21,10 @@ const serviceAccountKeyBase64 = Nconf.get('GOOGLE_SERVICE_ACCOUNT_KEY_BASE64');
 // Decode the base64-encoded JSON key
 const serviceAccountKeyJson = JSON.parse(Base64.decode(serviceAccountKeyBase64));
 
-const spreadsheetId = '1-D8efQECrlqbd6qzPGjpp7ZUODCsx61ck_9fRgCCWjE';
+const spreadsheetId = '1PM3nPkxvSpmGvBrMV3hWO2JnX1s755gsYJfTOoxY9gE';
 
 //const levshaApiUrl = 'http://localhost:8810';
-const levshaApiUrl = 'https://levsha-api-ne-dev.azurewebsites.net';
+const levshaApiUrl = 'https://levsha-api-ne-stage.azurewebsites.net';
 //const levshaApiUrl = 'https://api.levsha.eu';
 
 const timezones = {
