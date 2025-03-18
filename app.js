@@ -22,6 +22,8 @@ const { executeSyncGSheetPortalSessions } = require("./func/sync-gsheet-sessions
 
 const { executeSyncGSheetPortalSessionsDev } = require("./func/sync-gsheet-sessions-portal-dev");
 
+const { executeSyncGSheetActorsBR } = require("./func/sync-gsheet-actors-portal");
+
 const { startVendorAvailabilityBot } = require("./func/vend-availability-bot");
 const tgBot = require("./messengers/telegram");
 
@@ -36,6 +38,8 @@ tgBot.startBot();
 
 executeCheckAndRenameSessions();
 executeSyncGSheetActors();
+
+executeSyncGSheetActorsBR();
 
 executeCheckChangesSendNotif();
 executeSyncGSheetSessions();
