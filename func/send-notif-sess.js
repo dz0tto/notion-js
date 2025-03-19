@@ -115,10 +115,15 @@ module.exports.notifyPortalSession = async function(session, oldStatus, newStatu
         "Постпрод" : postProd, 
         "Инженер" : engineer,
         "Менеджер батча" : pm,
-        "Админ" : "dzotto@levsha.eu"
+        "Админ" : "dzotto@levsha.eu",
+        "Оплата" : 'fedorq@levsha.eu'
     };
+    let payment = '';
+    if (session.type === 'Актерская' && oldStatus !== newStatus && (oldStatus === 'Назначено' || oldStatus === 'Необходимо') && session.actorCurrency === 'RUB') {
+        payment = 'fedorq@levsha.eu';
+    }
     const admin = "dzotto@levsha.eu";
-    const emails = [director, postProd, engineer, admin, pm].filter(email => email !== "" && email !== null)
+    const emails = [director, postProd, engineer, admin, pm, payment].filter(email => email !== "" && email !== null)
     // send notification
     for (const email of emails) {
         const message = await formatPortalSessionNotification(session, oldStatus, newStatus, notionTimezone, email, people, link);
