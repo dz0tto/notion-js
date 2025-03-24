@@ -251,10 +251,10 @@ const createSession = async (session) => {
     sessionInfo.sessionStatus = 'Назначено'
     sessionInfo.actor = session['actorID']
     sessionInfo.actorName = session['актер']
-    sessionInfo.studioHours = session['ч']?.replace(',', '.') || 0
-    sessionInfo.directorHours = session['ч']?.replace(',', '.') || 0
-    sessionInfo.engineerHours = session['ч']?.replace(',', '.') || 0
-    sessionInfo.actorHours = session['вр']?.replace(',', '.') || 0
+    sessionInfo.studioHours = session['вр']?.replace(',', '.') || 0
+    sessionInfo.directorHours = session['вр']?.replace(',', '.') || 0
+    sessionInfo.engineerHours = session['вр']?.replace(',', '.') || 0
+    sessionInfo.actorHours = session['ч']?.replace(',', '.') || 0
     const actorRate = session.actorFull['Ставка за час'] || 0
     sessionInfo.actorRate = actorRate
     sessionInfo.actorSpecialRate = actorRate === session['ставка'] ? 0 : session['ставка']
